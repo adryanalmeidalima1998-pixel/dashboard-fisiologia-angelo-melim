@@ -1,16 +1,20 @@
 {
-  "name": "dashboard-fisiologia-novorizontino",
-  "version": "0.1.0",
+  "name": "dashboard-angelo-melim",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/*.test.mjs",
+    "acesso": "node scripts/setup-access.mjs"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
     "chart.js": "4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "geist": "^1.9.2",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.4",
@@ -23,10 +27,10 @@
     "react-chartjs-2": "^5.3.0",
     "react-dom": "19.2.3",
     "react-plotly.js": "^2.6.0",
-    "recharts": "^3.7.0",
-    "@vercel/postgres": "^0.10.0"
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
     "@tailwindcss/postcss": "^4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
