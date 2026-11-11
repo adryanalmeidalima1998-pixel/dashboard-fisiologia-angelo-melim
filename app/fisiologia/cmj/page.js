@@ -1,4 +1,6 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo, useEffect, useCallback } from 'react'
@@ -53,6 +55,8 @@ function getGps2d(gpsData, name, refDate) {
 
 // ─── COMPONENTE ───────────────────────────────────────────────────────────────
 export default function CMJPage() {
+  const { apiFetch, href } = useSeason()
+
   const router = useRouter()
   const { gpsData, excludedNamesNorm, playerPositions } = useData()
 
@@ -97,7 +101,7 @@ export default function CMJPage() {
   const fetchAll = useCallback(async () => {
     try {
       setIsLoading(true)
-      const res = await fetch('/api/cmj')
+      const res = await apiFetch('/api/cmj')
       if (!res.ok) throw new Error('Erro ao buscar dados')
       const d = await res.json()
       setColetas(d.coletas || [])
@@ -161,7 +165,7 @@ export default function CMJPage() {
     if (!media)  return setSaveErr('Insira pelo menos 1 salto.')
     setSaveErr(null); setSaving(true)
     try {
-      const res = await fetch('/api/cmj', {
+      const res = await apiFetch('/api/cmj', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ type:'coleta', athlete_name:atleta, data_coleta:data,
           salto_1: parseFloat(s1)||null, salto_2: parseFloat(s2)||null, salto_3: parseFloat(s3)||null, media }),
@@ -182,7 +186,7 @@ export default function CMJPage() {
     if (!avalData) return setAvalErr('Informe a data.')
     setAvalErr(null); setAvalSaving(true)
     try {
-      await Promise.all(entradas.map(a => fetch('/api/cmj', {
+      await Promise.all(entradas.map(a => apiFetch('/api/cmj', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ type:'coleta', athlete_name:a, data_coleta:avalData,
           salto_1:parseFloat(avalSaltos[a]), salto_2:null, salto_3:null, media:parseFloat(avalSaltos[a]) }),
@@ -199,7 +203,7 @@ export default function CMJPage() {
     if (!confirmDel) return
     setDeleting(confirmDel)
     try {
-      await fetch(`/api/cmj/${confirmDel}?table=coletas`, { method:'DELETE' })
+      await apiFetch(`/api/cmj/${confirmDel}?table=coletas`, { method:'DELETE' })
       await fetchAll()
     } finally { setDeleting(null); setConfirmDel(null) }
   }
@@ -236,7 +240,7 @@ export default function CMJPage() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-100 hover:bg-amber-500 transition-all p-2 rounded-xl">
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-100 hover:bg-amber-500 transition-all p-2 rounded-xl">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
               </svg>

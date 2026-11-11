@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // GET /api/name-aliases — retorna todos os aliases salvos
-export async function GET() {
+export const GET = withSeason(async function GET() {
   try {
     // Cria a tabela se não existir (idempotente)
     await sql`
@@ -18,11 +18,11 @@ export async function GET() {
     console.error('name-aliases GET error:', err)
     return Response.json({ error: 'Erro ao buscar aliases.' }, { status: 500 })
   }
-}
+})
 
 // POST /api/name-aliases — cria ou atualiza um alias
 // Body: { gps_name: string, bem_name: string }
-export async function POST(request) {
+export const POST = withSeason(async function POST(request) {
   try {
     const { gps_name, bem_name } = await request.json()
     if (!gps_name?.trim() || !bem_name?.trim()) {
@@ -47,4 +47,4 @@ export async function POST(request) {
     console.error('name-aliases POST error:', err)
     return Response.json({ error: 'Erro ao salvar alias.' }, { status: 500 })
   }
-}
+})

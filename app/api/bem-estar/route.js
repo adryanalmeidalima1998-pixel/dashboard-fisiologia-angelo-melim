@@ -1,25 +1,15 @@
-const SHEETS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS-cmQfBRf3_LpTHaqJmmolqENeue_-egKq6xpPvvW3bFWxqfZF9HbidZdWIqrKWT12-6Zf7BqQ4GSV/pub?output=csv'
-
-export async function GET() {
+import { sql, withSeason } from '@/lib/season-server'
+import { defaultWellnessSource, validWellnessSource } from '@/lib/wellness.mjs'
+export const GET = withSeason(async function GET(request, { season }) {
+  const { rows } = await sql`SELECT value FROM season_settings WHERE key = 'wellness_url'`
+  const url = rows.length ? rows[0].value : defaultWellnessSource(season.id)
+  if (!url) return new Response('', { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'X-Source-Configured': 'false' } })
+  if (!validWellnessSource(url)) return Response.json({ error: 'Fonte de bem-estar inválida.' }, { status: 422 })
   try {
-    const res = await fetch(SHEETS_URL, { cache: 'no-store' })
-
-    if (!res.ok) {
-      return Response.json({ error: 'Erro ao buscar planilha' }, { status: 502 })
-    }
-
-    const text = await res.text()
-
-    return new Response(text, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-store',
-      },
-    })
-  } catch (err) {
-    console.error('bem-estar API error:', err)
-    return Response.json({ error: 'Erro interno' }, { status: 500 })
-  }
-}
+    const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(15000) })
+    if (!response.ok) return Response.json({ error: 'Não foi possível acessar a planilha.' }, { status: 502 })
+    const csv = await response.text()
+    if (csv.trimStart().startsWith('<')) return Response.json({ error: 'A planilha não retornou CSV. Confira a publicação.' }, { status: 502 })
+    return new Response(csv, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'X-Source-Configured': 'true' } })
+  } catch { return Response.json({ error: 'Não foi possível acessar a planilha.' }, { status: 502 }) }
+})

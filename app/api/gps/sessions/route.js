@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // GET /api/gps/sessions — retorna todas as sessões salvas
-export async function GET() {
+export const GET = withSeason(async function GET() {
   try {
     const { rows } = await sql`
       SELECT id, session_date, session_name, filename, uploaded_at, rows, metadata
@@ -25,4 +25,4 @@ export async function GET() {
     console.error('GPS sessions fetch error:', err)
     return Response.json({ error: 'Erro ao buscar sessões.' }, { status: 500 })
   }
-}
+})

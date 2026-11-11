@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useData, suggestNameMatches, normalizeName } from '../context/DataContext'
@@ -37,6 +40,8 @@ function calcReadiness(preData, acwr, daysSinceLastGps) {
 }
 
 export default function Fisiologia() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const {
     gpsData, isLoadingGps, uploadStatus, uploadQueue, uploadGpsFile, uploadMultipleGpsFiles, deleteGpsSession, bulkDeleteGpsSessions,
@@ -198,7 +203,7 @@ export default function Fisiologia() {
     {
       id: 'bemEstar',
       titulo: 'Bem-Estar & sRPE',
-      descricao: 'Monitoramento completo de bem-estar, dor, hidratação e percepção de esforço dos atletas.',
+      descricao: 'Bem-estar, dor, hidratação e percepção de esforço por atleta.',
       rota: '/fisiologia/bem-estar',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,7 +225,7 @@ export default function Fisiologia() {
     {
       id: 'individual',
       titulo: 'Atleta Individual',
-      descricao: 'Histórico completo por atleta. Radar de métricas, dor localizada com boneco anatômico, GPS e bem-estar.',
+      descricao: 'Histórico por atleta: métricas GPS, bem-estar e localização da dor.',
       rota: '/fisiologia/individual',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +247,7 @@ export default function Fisiologia() {
     {
       id: 'exercicios',
       titulo: 'Biblioteca de Exercícios',
-      descricao: 'Catálogo de tarefas com custo GPS esperado (m/min, HSR, ACC/DEC, WCS). Sua ferramenta de prescrição.',
+      descricao: 'Catálogo de tarefas com estimativas de m/min, HSR, ACC/DEC e WCS.',
       rota: '/fisiologia/exercicios',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +258,7 @@ export default function Fisiologia() {
     {
       id: 'relatorios',
       titulo: 'Relatórios Automáticos',
-      descricao: 'Pós-sessão, pós-jogo, semanal e individual. Recomendações automáticas para decisões rápidas.',
+      descricao: 'Relatórios pós-sessão, pós-jogo, semanais e individuais, com recomendações automáticas.',
       rota: '/fisiologia/relatorios',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,9 +372,9 @@ export default function Fisiologia() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-16 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-16 w-auto" />
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-black uppercase leading-none">Grêmio Novorizontino</h1>
+              <h1 className="text-3xl font-black tracking-tighter text-black uppercase leading-none"><SeasonClub /></h1>
               <p className="text-base font-bold tracking-widest text-slate-600 uppercase">Departamento de Fisiologia</p>
             </div>
           </div>
@@ -399,7 +404,7 @@ export default function Fisiologia() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => router.push('/fisiologia/bem-estar')}
+                onClick={() => router.push(href('/fisiologia/bem-estar'))}
                 className="bg-amber-500 hover:bg-amber-400 text-black px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
               >
                 Ver dados
@@ -840,7 +845,7 @@ export default function Fisiologia() {
 
                 {suggestions.length > 0 && (
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">✨ Sugestões automáticas — clique para confirmar</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Correspondências sugeridas — clique para confirmar</p>
                     <div className="flex flex-col gap-2">
                       {suggestions.map((s, i) => {
                         const isLoading = aliasLoading.has(s.gpsName)
@@ -975,7 +980,7 @@ export default function Fisiologia() {
         {teamReadiness && (
           <div
             className="border-2 border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-amber-400 transition-all"
-            onClick={() => router.push('/fisiologia/diario')}
+            onClick={() => router.push(href('/fisiologia/diario'))}
           >
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
@@ -1029,7 +1034,7 @@ export default function Fisiologia() {
           {ferramentas.map((item) => (
             <button
               key={item.id}
-              onClick={() => router.push(item.rota)}
+              onClick={() => router.push(href(item.rota))}
               className="group border-2 border-slate-200 hover:border-amber-500 bg-white p-8 rounded-2xl text-left transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <div className="w-14 h-14 bg-slate-100 group-hover:bg-amber-500 rounded-xl flex items-center justify-center mb-6 transition-all duration-200 text-slate-500 group-hover:text-black">

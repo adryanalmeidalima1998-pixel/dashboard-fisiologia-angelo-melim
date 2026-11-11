@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 import React from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -441,6 +444,8 @@ function AnatomyFigure({ activeRegions, hoveredRegion, onHover }) {
 
 // ─── CONTEÚDO PRINCIPAL ───────────────────────────────────────────────────────
 function IndividualContent() {
+  const { href, apiFetch } = useSeason()
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const { gpsData, bemEstarData, vmaxBaseline, playerPositions: ctxPositions, isExcluded, normalizeName } = useData()
@@ -500,13 +505,13 @@ function IndividualContent() {
 
   const handlePrint = useCallback(() => {
     const url = `/print/individual?atleta=${encodeURIComponent(athlete)}&periodo=${periodFilter}`
-    window.open(url, '_blank', 'noopener')
+    window.open(href(url), '_blank', 'noopener')
   }, [athlete, periodFilter])
 
   // ── CMJ — busca local (mesmo endpoint da página CMJ) ─────────────────────
   const [cmjColetas, setCmjColetas] = useState([])
   useEffect(() => {
-    fetch('/api/cmj')
+    apiFetch('/api/cmj')
       .then(r => r.ok ? r.json() : { coletas: [] })
       .then(d => setCmjColetas(d.coletas || []))
       .catch(() => {})
@@ -823,14 +828,14 @@ function IndividualContent() {
       {/* HEADER */}
       <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
         <div className="flex items-center gap-4">
-          <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+          <SeasonLogo alt="Escudo" className="h-14 w-auto" />
           <div>
             <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Atleta Individual</h1>
             <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Histórico & Tendências</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap no-print">
-          <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+          <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
           <button onClick={() => setShowPositionConfig(true)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded-md text-xs font-bold transition-colors border border-slate-200">⚙ Posições</button>
           {/* Filtro de período */}
           <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">

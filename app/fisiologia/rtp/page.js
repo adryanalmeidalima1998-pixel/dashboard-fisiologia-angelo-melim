@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -39,15 +42,18 @@ function decision(score, st){
 }
 
 export default function RTPModule(){
+  const { storage } = useSeason()
+
   const [tab,setTab] = useState('dashboard')
+  const [loaded,setLoaded] = useState(false)
   const [data,setData] = useState({ athletes: [], worst: {}, sessions: [] })
   const [selectedId,setSelectedId] = useState('')
   const [athlete,setAthlete] = useState(emptyAthlete)
   const [session,setSession] = useState(emptySession)
   const reportRef = useRef(null)
 
-  useEffect(()=>{ const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const parsed=JSON.parse(saved); setData(parsed); setSelectedId(parsed.athletes?.[0]?.id || '') } },[])
-  useEffect(()=>{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) },[data])
+  useEffect(()=>{ try { const saved = storage.getItem(STORAGE_KEY); if(saved){ const parsed=JSON.parse(saved); if(Array.isArray(parsed.athletes)){ setData(parsed); setSelectedId(parsed.athletes[0]?.id || '') } } } catch {} finally { setLoaded(true) } },[storage])
+  useEffect(()=>{ if(loaded) { try { storage.setItem(STORAGE_KEY, JSON.stringify(data)) } catch {} } },[data,loaded,storage])
 
   const selected = data.athletes.find(a=>a.id===selectedId) || null
   const worst = data.worst[selectedId] || emptyWorst
@@ -117,8 +123,8 @@ function PanelLite({title,children}){ return <section className="rounded-xl bord
 function Input({label,v,set,type='text'}){ return <label className="block"><span className="text-[10px] font-black uppercase text-slate-500">{label}</span><input type={type} value={v ?? ''} onChange={e=>set(e.target.value)} className="mt-1 w-full rounded-xl border p-3 text-sm font-bold"/></label> }
 function TextArea({label,v,set,disabled=false}){ return <label className="block"><span className="text-[10px] font-black uppercase text-slate-500">{label}</span><textarea value={v ?? ''} disabled={disabled} onChange={e=>set(e.target.value)} className="mt-1 min-h-[110px] w-full rounded-xl border p-3 text-sm"/></label> }
 function Metric({title,value,color}){ const c=color==='green'?'bg-emerald-500':color==='yellow'?'bg-amber-400':color==='red'?'bg-red-500':color==='amber'?'bg-amber-500':'bg-black'; return <div className={`${c} rounded-2xl p-5 text-black ${color==='red'||color==='green'||color===undefined?'text-white':'text-black'}`}><p className="text-xs font-black uppercase opacity-70">{title}</p><p className="text-3xl font-black">{value}</p></div> }
-function Header({selected,score,dec}){ return <header className="flex flex-wrap items-center justify-between gap-4 border-b-4 border-amber-500 pb-4"><div><p className="text-xs font-black uppercase text-slate-500">Grêmio Novorizontino SAF</p><h1 className="text-3xl font-black uppercase">Relatório RTP</h1><p className="font-bold">{selected.nome} • {selected.lesao} • {selected.fase}</p></div><div className="text-right"><p className="text-xs font-black uppercase text-slate-500">Readiness / Decisão</p><p className="text-4xl font-black">{score}%</p><span className={`rounded-full px-4 py-1 text-xs font-black uppercase ${statusClass(dec.color)}`}>{dec.label}</span></div></header> }
+function Header({selected,score,dec}){ return <header className="flex flex-wrap items-center justify-between gap-4 border-b-4 border-amber-500 pb-4"><div><p className="text-xs font-black uppercase text-slate-500"><SeasonClub /></p><h1 className="text-3xl font-black uppercase">Relatório RTP</h1><p className="font-bold">{selected.nome} • {selected.lesao} • {selected.fase}</p></div><div className="text-right"><p className="text-xs font-black uppercase text-slate-500">Readiness / Decisão</p><p className="text-4xl font-black">{score}%</p><span className={`rounded-full px-4 py-1 text-xs font-black uppercase ${statusClass(dec.color)}`}>{dec.label}</span></div></header> }
 function Bar({label,p,sub}){ const c=p<60?'bg-emerald-500':p<=90?'bg-amber-400':'bg-red-500'; return <div className="mb-3"><div className="mb-1 flex justify-between text-xs font-bold"><span>{label}</span><span>{p}% • {sub}</span></div><div className="h-3 rounded-full bg-slate-200"><div className={`h-3 rounded-full ${c}`} style={{width:`${Math.min(p,100)}%`}}/></div></div> }
 function Criteria({label,v,ok}){ return <div className={`rounded-xl p-4 ${ok?'bg-emerald-50 border border-emerald-200':'bg-amber-50 border border-amber-200'}`}><p className="text-xs font-black uppercase text-slate-500">{label}</p><p className="text-2xl font-black">{v}</p></div> }
 function SessionTable({sessions,edit,remove,compact=false}){ return <div className="mt-4 overflow-auto"><table className="w-full text-xs"><thead className="bg-slate-900 text-white"><tr><th className="p-2 text-left">Data</th><th>DT</th><th>HSR</th><th>Vmax</th><th>ACC</th><th>DCC</th>{!compact&&<th>Ações</th>}</tr></thead><tbody>{sessions.map(s=><tr key={s.id} className="border-b bg-white text-center"><td className="p-2 text-left font-bold">{s.data}</td><td>{s.dt}</td><td>{s.hsr}</td><td>{s.vmax}</td><td>{s.acc3}</td><td>{s.dcc3}</td>{!compact&&<td className="flex justify-center gap-2 p-2"><button onClick={()=>edit(s)} className="rounded bg-black px-2 py-1 text-white">Editar</button><button onClick={()=>remove(s.id)} className="rounded bg-red-600 px-2 py-1 text-white">Excluir</button></td>}</tr>)}</tbody></table></div> }
-function EmptyState({setTab}){ return <div className="rounded-2xl bg-white p-8 text-center shadow-xl"><h2 className="text-2xl font-black">Comece cadastrando um atleta RTP</h2><p className="mt-2 text-slate-500">Depois cadastre o pior cenário e as sessões do atleta.</p><button onClick={()=>setTab('atletas')} className="mt-4 rounded-xl bg-amber-500 px-5 py-3 font-black uppercase">Cadastrar atleta</button></div> }
+function EmptyState({setTab}){ return <div className="rounded-2xl bg-white p-8 text-center shadow-xl"><h2 className="text-2xl font-black">Nenhum atleta cadastrado no RTP</h2><p className="mt-2 text-slate-500">Cadastre um atleta para registrar o cenário de referência e as sessões.</p><button onClick={()=>setTab('atletas')} className="mt-4 rounded-xl bg-amber-500 px-5 py-3 font-black uppercase">Cadastrar atleta</button></div> }

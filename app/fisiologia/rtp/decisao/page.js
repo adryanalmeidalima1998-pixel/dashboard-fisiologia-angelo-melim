@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -240,25 +243,28 @@ function NumberGrid({ title, data, setData }) {
 }
 
 export default function DecisaoClinicaRTP() {
+  const { storage } = useSeason()
+
   const [form, setForm] = useState(initialState)
+  const [loaded, setLoaded] = useState(false)
   const printRef = useRef(null)
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY)
+      const saved = storage.getItem(STORAGE_KEY)
       if (saved) setForm(JSON.parse(saved))
     } catch (error) {
       console.error('Erro ao carregar decisão clínica RTP:', error)
-    }
+    } finally { setLoaded(true) }
   }, [])
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form))
+      if (loaded) storage.setItem(STORAGE_KEY, JSON.stringify(form))
     } catch (error) {
       console.error('Erro ao salvar decisão clínica RTP:', error)
     }
-  }, [form])
+  }, [form, loaded, storage])
 
   const c = form.criterios
   const gpsScore = useMemo(() => cumprimento(form.realizado, form.planejado), [form.realizado, form.planejado])
@@ -316,7 +322,7 @@ export default function DecisaoClinicaRTP() {
       <div ref={printRef} className="print-page mx-auto max-w-[1500px] rounded-2xl border border-yellow-500 bg-black p-5 shadow-[0_0_30px_rgba(234,179,8,0.18)]">
         <header className="mb-4 grid grid-cols-12 gap-3 border-b border-yellow-500/70 pb-4">
           <div className="col-span-12 flex items-center gap-4 lg:col-span-5">
-            <img src="/club/escudonovorizontino.png" alt="Escudo Novorizontino" className="h-20 w-20 object-contain" />
+            <SeasonLogo alt="Escudo do clube" className="h-20 w-20 object-contain" />
             <div>
               <h1 className="text-3xl font-black uppercase leading-tight text-yellow-400">Decisão Clínica RTP</h1>
               <p className="text-sm font-bold uppercase tracking-wider text-zinc-300">Retorno de lesão · Departamento de Performance</p>

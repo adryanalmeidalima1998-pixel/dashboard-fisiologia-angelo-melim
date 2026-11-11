@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -244,6 +247,8 @@ function AthleteCard({ athlete, gpsRow, vmaxBaseline, recovery, onDetail }) {
 
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────────
 export default function DiarioDashboard() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, bemEstarData, vmaxBaseline, isLoadingBemEstar, fetchBemEstar, uploadGpsFile, playerPositions, excludedNamesNorm, normalizeName } = useData()
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
@@ -481,7 +486,7 @@ export default function DiarioDashboard() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Dashboard Diário</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Prontidão & Carga por Atleta</p>
@@ -489,7 +494,7 @@ export default function DiarioDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <ExportPdfButton filename="dashboard-diario" />
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
             <div className="bg-amber-500 text-black px-4 py-1 font-black text-sm uppercase italic shadow-md">
@@ -617,7 +622,7 @@ export default function DiarioDashboard() {
                   return (
                     <div
                       key={a.name}
-                      onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(a.name)}`)}
+                      onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(a.name)}`))}
                       className={`border-2 rounded-xl p-4 cursor-pointer hover:shadow-md transition-all ${r.verdict.bg}`}
                     >
                       <div className="flex items-center gap-3 mb-3">
@@ -720,7 +725,7 @@ export default function DiarioDashboard() {
                     <div
                       key={name}
                       className="flex items-center gap-2 bg-white border border-blue-200 rounded-lg px-3 py-2 cursor-pointer hover:border-amber-400 transition-all"
-                      onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`)}
+                      onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`))}
                     >
                       <AthleteAvatar name={name} size="w-7 h-7" />
                       <span className="text-xs font-black text-slate-700">{name.split(' ').slice(0, 2).join(' ')}</span>
@@ -766,7 +771,7 @@ export default function DiarioDashboard() {
                 gpsRow={gpsMap[athlete.name] || null}
                 vmaxBaseline={vmaxBaseline}
                 recovery={recoveryMap[athlete.name] || null}
-                onDetail={name => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`)}
+                onDetail={name => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`))}
               />
             ))}
           </div>

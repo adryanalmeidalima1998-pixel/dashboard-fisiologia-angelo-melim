@@ -1,6 +1,11 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useState } from 'react'
+import { signOut } from 'next-auth/react'
+import { ArrowLeftRight, LogOut, Settings } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 
@@ -188,9 +193,12 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  { id:'configuracoes', titulo:'Configurações', rota:'/fisiologia/configuracoes', icon:<Settings size={20}/> },
 ]
 
 export default function Sidebar() {
+  const { href, season } = useSeason()
+
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -205,21 +213,20 @@ export default function Sidebar() {
       className={`
         flex flex-col shrink-0 border-r-4 border-amber-500 bg-white
         transition-all duration-300 ease-in-out
-        ${collapsed ? 'w-[64px]' : 'w-[220px]'}
+        ${collapsed ? 'w-[64px]' : 'w-[64px] md:w-[220px]'}
         sticky top-0 h-screen overflow-hidden
       `}
     >
       {/* LOGO + CLUBE */}
-      <div className={`flex items-center gap-3 px-3 pt-4 pb-3 border-b-2 border-slate-100 ${collapsed ? 'justify-center' : ''}`}>
-        <img
-          src="/club/escudonovorizontino.png"
+      <div className={`flex items-center gap-3 px-3 pt-4 pb-3 border-b-2 border-slate-100 ${collapsed ? 'justify-center' : 'justify-center md:justify-start'}`}>
+        <SeasonLogo
           alt="Escudo"
           className="h-9 w-9 shrink-0 object-contain"
         />
         {!collapsed && (
-          <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 leading-none">Grêmio</p>
-            <p className="text-sm font-black uppercase tracking-tight text-black leading-tight">Novorizontino</p>
+          <div className="min-w-0 hidden md:block">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 leading-none">Temporada {season.year}</p>
+            <p className="text-sm font-black uppercase tracking-tight text-black leading-tight"><SeasonClub short /></p>
             <div className="mt-0.5 bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 uppercase inline-block">
               Fisiologia
             </div>
@@ -234,43 +241,48 @@ export default function Sidebar() {
           return (
             <button
               key={item.id}
-              onClick={() => router.push(item.rota)}
-              title={collapsed ? item.titulo : undefined}
+              onClick={() => router.push(href(item.rota))}
+              title={item.titulo} aria-label={item.titulo}
               className={`
                 flex items-center gap-3 rounded-xl px-2 py-2.5 text-left w-full
                 transition-all duration-150 group
                 ${active
-                  ? 'bg-amber-500 text-black'
+                  ? 'club-active'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-black'
                 }
-                ${collapsed ? 'justify-center' : ''}
+                ${collapsed ? 'justify-center' : 'justify-center md:justify-start'}
               `}
             >
-              <span className={`shrink-0 ${active ? 'text-black' : 'text-slate-500 group-hover:text-black'}`}>
+              <span className={`shrink-0 ${active ? 'text-current' : 'text-slate-500 group-hover:text-black'}`}>
                 {item.icon}
               </span>
               {!collapsed && (
-                <span className={`text-[11px] font-black uppercase tracking-tight leading-tight truncate ${active ? 'text-black' : ''}`}>
+                <span className={`hidden md:block text-[11px] font-black uppercase tracking-tight leading-tight truncate ${active ? 'text-current' : ''}`}>
                   {item.titulo}
                 </span>
               )}
               {!collapsed && active && (
-                <span className="ml-auto shrink-0 w-1.5 h-1.5 rounded-full bg-black" />
+                <span className="hidden md:block ml-auto shrink-0 w-1.5 h-1.5 rounded-full bg-current" />
               )}
             </button>
           )
         })}
       </nav>
 
+      <div className="sidebar-personal border-t border-slate-200 p-2 text-slate-600">
+        {!collapsed && <div className="hidden md:block px-2 py-2"><p className="text-[11px] font-bold text-black">Ângelo Melim</p><p className="text-[9px]">Fisiologia & performance</p></div>}
+        <button title="Trocar temporada" onClick={() => window.location.assign('/temporadas')} className="w-full flex items-center justify-center md:justify-start gap-2 p-2 rounded-lg hover:bg-slate-100"><ArrowLeftRight size={17}/>{!collapsed && <span className="hidden md:inline text-[11px] font-bold">Trocar temporada</span>}</button>
+        <button title="Sair" onClick={() => { try { sessionStorage.removeItem('angelo:season') } catch {} signOut({callbackUrl:'/login'}) }} className="w-full flex items-center justify-center md:justify-start gap-2 p-2 rounded-lg hover:bg-slate-100"><LogOut size={17}/>{!collapsed && <span className="hidden md:inline text-[11px] font-bold">Sair</span>}</button>
+      </div>
       {/* COLLAPSE BUTTON */}
-      <div className="border-t-2 border-slate-100 p-2">
+      <div className="hidden md:block border-t-2 border-slate-100 p-2">
         <button
           onClick={() => setCollapsed(prev => !prev)}
           className={`
             w-full flex items-center gap-2 px-2 py-2 rounded-xl
             text-slate-500 hover:text-black hover:bg-slate-100
             transition-all duration-150
-            ${collapsed ? 'justify-center' : ''}
+            ${collapsed ? 'justify-center' : 'justify-center md:justify-start'}
           `}
           title={collapsed ? 'Expandir menu' : 'Recolher menu'}
         >

@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useRef, useCallback } from 'react'
@@ -6,6 +9,8 @@ import { useData } from '../../context/DataContext'
 import { AthleteAvatar, compressAndSave, getCustomPhoto, getStaticPhoto, photoStorageKey } from '../../utils/athletePhotos'
 
 export default function FotosAtletas() {
+  const { season, href } = useSeason()
+
   const router = useRouter()
   const { gpsData, bemEstarData } = useData()
   const [search, setSearch] = useState('')
@@ -26,13 +31,13 @@ export default function FotosAtletas() {
   // Re-render quando uma foto for salva em qualquer card
   const handlePhotoSaved = useCallback(() => setTick(t => t + 1), [])
 
-  const withPhoto    = allAthletes.filter(n => getCustomPhoto(n) || getStaticPhoto(n))
-  const withoutPhoto = allAthletes.filter(n => !getCustomPhoto(n) && !getStaticPhoto(n))
+  const withPhoto    = allAthletes.filter(n => getCustomPhoto(n, season.id) || getStaticPhoto(n, season.id))
+  const withoutPhoto = allAthletes.filter(n => !getCustomPhoto(n, season.id) && !getStaticPhoto(n, season.id))
 
   const filtered = allAthletes
     .filter(n => {
-      if (filter === 'com_foto')  return getCustomPhoto(n) || getStaticPhoto(n)
-      if (filter === 'sem_foto')  return !getCustomPhoto(n) && !getStaticPhoto(n)
+      if (filter === 'com_foto')  return getCustomPhoto(n, season.id) || getStaticPhoto(n, season.id)
+      if (filter === 'sem_foto')  return !getCustomPhoto(n, season.id) && !getStaticPhoto(n, season.id)
       return true
     })
     .filter(n => !search.trim() || n.toLowerCase().includes(search.trim().toLowerCase()))
@@ -44,14 +49,14 @@ export default function FotosAtletas() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Fotos dos Atletas</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Inserir e Gerenciar</p>
             </div>
           </div>
           <button
-            onClick={() => router.push('/fisiologia')}
+            onClick={() => router.push(href('/fisiologia'))}
             className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors"
           >
             ← VOLTAR
@@ -151,13 +156,15 @@ export default function FotosAtletas() {
 
 // ── Card individual do atleta ──────────────────────────────────────────────────
 function AthleteCard({ name, onSaved }) {
-  const [customPhoto, setCustomPhoto] = useState(() => getCustomPhoto(name))
+  const { season } = useSeason()
+
+  const [customPhoto, setCustomPhoto] = useState(() => getCustomPhoto(name, season.id))
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
   const fileRef = useRef(null)
 
   const hasCustom = !!customPhoto
-  const hasStatic = !!getStaticPhoto(name)
+  const hasStatic = !!getStaticPhoto(name, season.id)
   const hasAnyPhoto = hasCustom || hasStatic
 
   const handleFile = (e) => {
@@ -170,11 +177,11 @@ function AthleteCard({ name, onSaved }) {
       setJustSaved(true)
       setTimeout(() => setJustSaved(false), 2000)
       if (onSaved) onSaved()
-    })
+    }, season.id)
     e.target.value = ''
   }
 
-  const displayPhoto = customPhoto || getStaticPhoto(name)
+  const displayPhoto = customPhoto || getStaticPhoto(name, season.id)
   const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
   const shortName = name.split(' ').slice(0, 2).join(' ')
 

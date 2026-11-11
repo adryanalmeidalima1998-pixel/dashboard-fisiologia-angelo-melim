@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // DELETE /api/injury-history/[id]
-export async function DELETE(request, { params }) {
+export const DELETE = withSeason(async function DELETE(request, { params }) {
   try {
     const { id } = await params
     const { rows } = await sql`DELETE FROM injury_history WHERE id = ${id} RETURNING id`
@@ -11,4 +11,4 @@ export async function DELETE(request, { params }) {
     console.error('Injury DELETE error:', err)
     return Response.json({ error: 'Erro ao deletar lesão.' }, { status: 500 })
   }
-}
+})

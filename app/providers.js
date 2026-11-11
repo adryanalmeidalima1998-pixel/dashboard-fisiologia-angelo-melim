@@ -1,14 +1,6 @@
 'use client'
-
-import { SessionProvider } from "next-auth/react"
-import { DataProvider } from "./context/DataContext"
-
+import { SessionProvider } from 'next-auth/react'
+import { SeasonProvider } from './context/SeasonContext'
 export function Providers({ children }) {
-  return (
-    <SessionProvider>
-      <DataProvider>
-        {children}
-      </DataProvider>
-    </SessionProvider>
-  )
+  return <SessionProvider refetchInterval={60} refetchOnWindowFocus><SeasonProvider>{children}</SeasonProvider></SessionProvider>
 }

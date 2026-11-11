@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // DELETE /api/squad-exclusions/[id]
-export async function DELETE(request, { params }) {
+export const DELETE = withSeason(async function DELETE(request, { params }) {
   try {
     const { id } = await params
     const { rowCount } = await sql`
@@ -15,4 +15,4 @@ export async function DELETE(request, { params }) {
     console.error('squad-exclusions DELETE error:', err)
     return Response.json({ error: 'Erro ao remover exclusão.' }, { status: 500 })
   }
-}
+})

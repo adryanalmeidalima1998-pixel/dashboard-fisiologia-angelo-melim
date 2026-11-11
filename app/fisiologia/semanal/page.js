@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo, useEffect, useRef } from 'react'
@@ -110,6 +113,8 @@ function getDefaultCycleStart() {
 }
 
 export default function SemanalDashboard() {
+  const { storage, href } = useSeason()
+
   const router = useRouter()
   const dateStartRef = useRef(null)
   const dateEndRef = useRef(null)
@@ -140,7 +145,7 @@ export default function SemanalDashboard() {
 
   const [excludedAthletes, setExcludedAthletes] = useState(() => {
     try {
-      const saved = localStorage.getItem(getWeekKey(getDefaultCycleStart()))
+      const saved = storage.getItem(getWeekKey(getDefaultCycleStart()))
       return saved ? new Set(JSON.parse(saved)) : new Set()
     } catch { return new Set() }
   })
@@ -150,7 +155,7 @@ export default function SemanalDashboard() {
   // Estrutura: { jogos: [{id, date, label}], minutes: { "Atleta": { sessionId: min } } }
   const minutagemKey = `minutagem_${cycleStartStr}_${cycleEndStr}`
   const [minutagemData, setMinutagemData] = useState(() => {
-    try { const s = localStorage.getItem(`minutagem_${getDefaultCycleStart()}`); return s ? JSON.parse(s) : { jogos: [], minutes: {} } }
+    try { const s = storage.getItem(`minutagem_${getDefaultCycleStart()}`); return s ? JSON.parse(s) : { jogos: [], minutes: {} } }
     catch { return { jogos: [], minutes: {} } }
   })
   const [newJogoLabel, setNewJogoLabel] = useState('')
@@ -158,11 +163,11 @@ export default function SemanalDashboard() {
 
   // Carrega minutagem quando o ciclo muda
   const loadMinutagem = (key) => {
-    try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : { jogos: [], minutes: {} } }
+    try { const s = storage.getItem(key); return s ? JSON.parse(s) : { jogos: [], minutes: {} } }
     catch { return { jogos: [], minutes: {} } }
   }
   const saveMinutagem = (data, key) => {
-    try { localStorage.setItem(key, JSON.stringify(data)) } catch {}
+    try { storage.setItem(key, JSON.stringify(data)) } catch {}
   }
   const updateMinute = (athlete, sessionId, value) => {
     setMinutagemData(prev => {
@@ -195,13 +200,13 @@ export default function SemanalDashboard() {
 
   // Sincroniza exclusões com localStorage sempre que cycleStartStr ou excludedAthletes mudam
   function saveExclusions(next, startStr) {
-    try { localStorage.setItem(getWeekKey(startStr), JSON.stringify(Array.from(next))) } catch {}
+    try { storage.setItem(getWeekKey(startStr), JSON.stringify(Array.from(next))) } catch {}
   }
 
   // Carrega exclusões do localStorage quando troca de semana
   const loadExclusionsForWeek = (startStr) => {
     try {
-      const saved = localStorage.getItem(getWeekKey(startStr))
+      const saved = storage.getItem(getWeekKey(startStr))
       return saved ? new Set(JSON.parse(saved)) : new Set()
     } catch { return new Set() }
   }
@@ -654,14 +659,14 @@ export default function SemanalDashboard() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Microciclo Semanal</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Carga, Monotonia & ACWR</p>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
             <button
               onClick={async () => {
                 setIsPdfLoading(true)
@@ -985,7 +990,7 @@ export default function SemanalDashboard() {
                       <tr
                         key={athlete}
                         className={`border-b border-slate-100 cursor-pointer hover:bg-amber-50 transition-colors ${below20 ? 'bg-red-50/60' : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
-                        onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`)}
+                        onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`))}
                       >
                         <td className="py-2 pr-4 font-bold text-black text-xs">
                           <div className="flex items-center gap-2">
@@ -1175,7 +1180,7 @@ export default function SemanalDashboard() {
                       const isExcluded = excludedAthletes.has(athlete)
                       return (
                         <tr key={athlete} className={`border-b border-slate-100 hover:bg-amber-50 cursor-pointer ${isExcluded ? 'opacity-50 bg-slate-50' : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
-                          onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`)}>
+                          onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`))}>
                           <td className="py-2 pr-4 font-bold text-black">
                             <div className="flex items-center gap-2">
                               <AthleteAvatar name={athlete} size="w-7 h-7" />
@@ -1277,7 +1282,7 @@ export default function SemanalDashboard() {
 
                       return (
                         <tr key={athlete} className={`border-b border-slate-100 hover:bg-amber-50 cursor-pointer ${belowGroup ? 'bg-red-50/40' : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
-                          onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`)}>
+                          onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`))}>
                           <td className="py-2 pr-4 font-bold text-black">
                             <div className="flex items-center gap-2">
                               <AthleteAvatar name={athlete} size="w-7 h-7" />
@@ -1393,7 +1398,7 @@ export default function SemanalDashboard() {
                         key={athlete}
                         className="grid gap-1 mb-0.5 items-center cursor-pointer group"
                         style={{ gridTemplateColumns: `200px repeat(${weekDays.length}, 1fr) 80px 60px` }}
-                        onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`)}
+                        onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(athlete)}`))}
                       >
                         {/* Nome */}
                         <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg group-hover:bg-amber-50 transition-colors">
@@ -2086,7 +2091,7 @@ export default function SemanalDashboard() {
                             const reports = weekBemEstar.filter(r => r.playerName === name && r.temDor)
                             return (
                               <div key={name} className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2"
-                                onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`)}>
+                                onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`))}>
                                 <AthleteAvatar name={name} size="w-7 h-7" />
                                 <div>
                                   <p className="text-xs font-black text-slate-700">{name.split(' ').slice(0,2).join(' ')}</p>

@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // ─── PARSER (server-side) ─────────────────────────────────────────────────────
 function parseGpsCSV(csvText) {
@@ -82,7 +82,7 @@ function parseGpsCSV(csvText) {
 }
 
 // ─── POST /api/gps/upload ─────────────────────────────────────────────────────
-export async function POST(request) {
+export const POST = withSeason(async function POST(request) {
   try {
     const formData = await request.formData()
     const file          = formData.get('file')
@@ -152,4 +152,4 @@ export async function POST(request) {
     console.error('GPS upload error:', err)
     return Response.json({ error: 'Erro interno ao processar o arquivo.' }, { status: 500 })
   }
-}
+})

@@ -1,8 +1,8 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // POST /api/gps/sessions/bulk-delete
 // Body: { ids: number[] }
-export async function POST(request) {
+export const POST = withSeason(async function POST(request) {
   try {
     const { ids } = await request.json()
 
@@ -29,4 +29,4 @@ export async function POST(request) {
     console.error('GPS bulk-delete error:', err)
     return Response.json({ error: 'Erro ao remover sessões.' }, { status: 500 })
   }
-}
+})

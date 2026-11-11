@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -42,6 +45,8 @@ function intensityColor(val, low, high) {
 }
 
 export default function ExerciciosPage() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData } = useData()
   const [categoria, setCategoria] = useState('Todos')
@@ -119,14 +124,14 @@ export default function ExerciciosPage() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Biblioteca de Exercícios</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Catálogo de Prescrição — Custo GPS Esperado</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
             <button onClick={() => setShowAddModal(true)} className="bg-amber-500 text-black px-3 py-1 rounded-md text-xs font-black hover:bg-amber-400 transition-colors">+ Novo exercício</button>
           </div>
         </header>

@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // Normaliza nome (mesma lógica do DataContext)
 function normalizeName(name) {
@@ -13,7 +13,7 @@ function normalizeName(name) {
 }
 
 // GET /api/squad-exclusions
-export async function GET() {
+export const GET = withSeason(async function GET() {
   try {
     const { rows } = await sql`
       SELECT id, player_name, normalized_name, excluded_at
@@ -25,10 +25,10 @@ export async function GET() {
     console.error('squad-exclusions GET error:', err)
     return Response.json({ error: 'Erro ao buscar exclusões.' }, { status: 500 })
   }
-}
+})
 
 // POST /api/squad-exclusions
-export async function POST(request) {
+export const POST = withSeason(async function POST(request) {
   try {
     const { player_name } = await request.json()
     if (!player_name?.trim()) {
@@ -50,4 +50,4 @@ export async function POST(request) {
     console.error('squad-exclusions POST error:', err)
     return Response.json({ error: 'Erro ao excluir atleta.' }, { status: 500 })
   }
-}
+})

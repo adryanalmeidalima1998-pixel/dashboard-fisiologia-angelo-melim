@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // DELETE /api/name-aliases/[id]
-export async function DELETE(request, context) {
+export const DELETE = withSeason(async function DELETE(request, context) {
   try {
     const params = await context.params
     const id = Number(params?.id)
@@ -15,4 +15,4 @@ export async function DELETE(request, context) {
     console.error('name-aliases DELETE error:', err)
     return Response.json({ error: 'Erro ao remover alias.' }, { status: 500 })
   }
-}
+})

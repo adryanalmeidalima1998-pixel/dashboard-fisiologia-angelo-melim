@@ -1,4 +1,6 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+
 
 import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
 import Papa from 'papaparse'
@@ -188,6 +190,8 @@ export function calcVmaxPct(sessionVmax, historicalMax) {
 
 // ─── PROVIDER ─────────────────────────────────────────────────────────────────
 export function DataProvider({ children }) {
+  const { apiFetch } = useSeason()
+
   const [gpsData, setGpsData] = useState([])
   const [isLoadingGps, setIsLoadingGps] = useState(false)
   const [gpsError, setGpsError] = useState(null)
@@ -197,6 +201,7 @@ export function DataProvider({ children }) {
   const [bemEstarData, setBemEstarData] = useState([])
   const [isLoadingBemEstar, setIsLoadingBemEstar] = useState(false)
   const [bemEstarError, setBemEstarError] = useState(null)
+  const [bemEstarConfigured, setBemEstarConfigured] = useState(null)
 
   const [vmaxBaseline, setVmaxBaseline] = useState({})
   const [canonicalMap, setCanonicalMap] = useState({})
@@ -223,7 +228,7 @@ export function DataProvider({ children }) {
   const fetchSquadExclusions = useCallback(async () => {
     setIsLoadingExclusions(true)
     try {
-      const res = await fetch('/api/squad-exclusions')
+      const res = await apiFetch('/api/squad-exclusions')
       if (!res.ok) return
       const { exclusions } = await res.json()
       setSquadExclusions(exclusions || [])
@@ -238,7 +243,7 @@ export function DataProvider({ children }) {
 
   const addSquadExclusion = useCallback(async (playerName) => {
     try {
-      const res = await fetch('/api/squad-exclusions', {
+      const res = await apiFetch('/api/squad-exclusions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ player_name: playerName }),
@@ -258,7 +263,7 @@ export function DataProvider({ children }) {
 
   const removeSquadExclusion = useCallback(async (id) => {
     try {
-      const res = await fetch(`/api/squad-exclusions/${id}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/squad-exclusions/${id}`, { method: 'DELETE' })
       if (!res.ok) return { success: false }
       setSquadExclusions(prev => prev.filter(e => e.id !== id))
       return { success: true }
@@ -272,7 +277,7 @@ export function DataProvider({ children }) {
     setIsLoadingGps(true)
     setGpsError(null)
     try {
-      const res = await fetch('/api/gps/sessions')
+      const res = await apiFetch('/api/gps/sessions')
       if (!res.ok) throw new Error('Erro ao buscar sessões GPS')
       const { sessions } = await res.json()
       const processedSessions = applyAliasesToSessions(sessions || [], nameAliases)
@@ -293,7 +298,7 @@ export function DataProvider({ children }) {
   const fetchNameAliases = useCallback(async () => {
     setIsLoadingAliases(true)
     try {
-      const res = await fetch('/api/name-aliases')
+      const res = await apiFetch('/api/name-aliases')
       if (!res.ok) return
       const { aliases } = await res.json()
       setNameAliases(aliases || [])
@@ -308,7 +313,7 @@ export function DataProvider({ children }) {
 
   const addNameAlias = useCallback(async (gpsName, bemName) => {
     try {
-      const res = await fetch('/api/name-aliases', {
+      const res = await apiFetch('/api/name-aliases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ gps_name: gpsName, bem_name: bemName }),
@@ -327,7 +332,7 @@ export function DataProvider({ children }) {
 
   const removeNameAlias = useCallback(async (id) => {
     try {
-      const res = await fetch(`/api/name-aliases/${id}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/name-aliases/${id}`, { method: 'DELETE' })
       if (!res.ok) return { success: false }
       setNameAliases(prev => prev.filter(a => a.id !== id))
       return { success: true }
@@ -363,7 +368,7 @@ export function DataProvider({ children }) {
     if (metadata.mando) formData.append('mando', metadata.mando)
 
     try {
-      const res = await fetch('/api/gps/upload', { method: 'POST', body: formData })
+      const res = await apiFetch('/api/gps/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok || data.error) {
         setUploadStatus({ type: 'error', message: data.error || 'Erro ao processar CSV.' })
@@ -406,7 +411,7 @@ export function DataProvider({ children }) {
       if (item.metadata.mando) formData.append('mando', item.metadata.mando)
 
       try {
-        const res = await fetch('/api/gps/upload', { method: 'POST', body: formData })
+        const res = await apiFetch('/api/gps/upload', { method: 'POST', body: formData })
         const data = await res.json()
         if (!res.ok || data.error) {
           setUploadQueue(prev => prev.map((q, idx) => idx === i ? { ...q, status: 'error', message: data.error || 'Erro' } : q))
@@ -425,7 +430,7 @@ export function DataProvider({ children }) {
   // ── Deletar sessão GPS ────────────────────────────────────────────────────
   const deleteGpsSession = useCallback(async (id) => {
     try {
-      const res = await fetch(`/api/gps/sessions/${id}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/gps/sessions/${id}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) return { success: false, error: data.error || 'Erro ao excluir sessão.' }
       setGpsData(prev => {
@@ -442,7 +447,7 @@ export function DataProvider({ children }) {
   // ── Deletar múltiplas sessões GPS ─────────────────────────────────────────
   const bulkDeleteGpsSessions = useCallback(async (ids) => {
     try {
-      const res = await fetch('/api/gps/sessions/bulk-delete', {
+      const res = await apiFetch('/api/gps/sessions/bulk-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
@@ -465,9 +470,10 @@ export function DataProvider({ children }) {
     setIsLoadingBemEstar(true)
     setBemEstarError(null)
     try {
-      const res = await fetch(SHEETS_URL)
+      const res = await apiFetch(SHEETS_URL)
       if (!res.ok) throw new Error('Erro ao buscar planilha')
       const text = await res.text()
+      setBemEstarConfigured(res.headers.get('X-Source-Configured') !== 'false')
       setBemEstarData(parseBemEstarCSV(text))
     } catch (e) {
       setBemEstarError(e.message)
@@ -523,6 +529,7 @@ export function DataProvider({ children }) {
       bemEstarData,
       isLoadingBemEstar,
       bemEstarError,
+      bemEstarConfigured,
       fetchBemEstar,
       vmaxBaseline,
       playerPositions: (() => {

@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -83,6 +86,8 @@ function AcwrTooltip({ active, payload, label }) {
 
 // ─── PAGINA ───────────────────────────────────────────────────────────────────
 export default function AcwrPage() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, bemEstarData, playerPositions, nameAliases, isExcluded } = useData()
 
@@ -335,7 +340,7 @@ export default function AcwrPage() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">ACWR</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Razao Carga Aguda : Cronica</p>
@@ -343,7 +348,7 @@ export default function AcwrPage() {
           </div>
           <div className="flex items-center gap-2">
             <ExportPdfButton filename="acwr" />
-            <button onClick={() => router.push('/fisiologia')}
+            <button onClick={() => router.push(href('/fisiologia'))}
               className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               Voltar
             </button>
@@ -571,7 +576,7 @@ export default function AcwrPage() {
                 </p>
               </div>
               <button
-                onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(selectedData.name)}`)}
+                onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(selectedData.name)}`))}
                 className="ml-auto bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all">
                 Ver perfil completo
               </button>

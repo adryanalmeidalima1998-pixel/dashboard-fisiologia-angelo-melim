@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // DELETE /api/gps/sessions/[id]
-export async function DELETE(request, context) {
+export const DELETE = withSeason(async function DELETE(request, context) {
   try {
     const params = await context.params
     const rawId = params?.id
@@ -23,12 +23,12 @@ export async function DELETE(request, context) {
     console.error('GPS delete error:', err)
     return Response.json({ error: 'Erro ao remover sessão.' }, { status: 500 })
   }
-}
+})
 
 // PATCH /api/gps/sessions/[id]
 // body: { metadata: { result, mando, opponent, competition, ... } }
 // Faz merge: preserva campos existentes, sobrescreve só o que vier no body
-export async function PATCH(request, context) {
+export const PATCH = withSeason(async function PATCH(request, context) {
   try {
     const params = await context.params
     const rawId = params?.id
@@ -65,4 +65,4 @@ export async function PATCH(request, context) {
     console.error('GPS PATCH error:', err)
     return Response.json({ error: 'Erro ao atualizar sessão.' }, { status: 500 })
   }
-}
+})

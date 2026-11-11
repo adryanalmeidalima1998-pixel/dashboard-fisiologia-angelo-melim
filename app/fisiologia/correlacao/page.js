@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
@@ -247,7 +250,7 @@ const RESULT_CFG = {
   D: { label: 'Derrota', pts: 0, text: 'text-red-600',   bar: '#ef4444', border: 'border-red-200',   bg: 'bg-red-50' },
 }
 
-const COMPETICOES = ['Série C', 'Copa do Brasil', 'Paulistão', 'Brasileiro SUB20 Série B', 'Paulistão SUB20 Série A', 'Copa Sul Sudeste', 'Amistoso', 'Outra']
+const COMPETICOES = ['Série C', 'Copa do Brasil', 'Paulistão', 'Campeonato Carioca', 'Copa Rio', 'Brasileiro SUB20 Série B', 'Paulistão SUB20 Série A', 'Copa Sul Sudeste', 'Amistoso', 'Outra']
 
 // ─── COMPONENTES ──────────────────────────────────────────────────────────────
 
@@ -408,6 +411,8 @@ const GRAMADO     = ['Bom', 'Regular', 'Ruim', 'Sintético']
 const CLIMA       = ['Normal', 'Calor', 'Chuva', 'Frio', 'Vento']
 
 function EditContextModal({ game, onClose, onSave }) {
+  const { apiFetch } = useSeason()
+
   const [form, setForm] = useState({
     result:        game.result        || '',
     mando:         game.mando         || '',
@@ -432,7 +437,7 @@ function EditContextModal({ game, onClose, onSave }) {
   async function handleSave() {
     setSaving(true); setError('')
     try {
-      const res = await fetch(`/api/gps/sessions/${game.id}`, {
+      const res = await apiFetch(`/api/gps/sessions/${game.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -625,6 +630,8 @@ function EditContextModal({ game, onClose, onSave }) {
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function CorrelacaoPage() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, vmaxBaseline, isExcluded, fetchGpsSessions } = useData()
 
@@ -1027,7 +1034,7 @@ export default function CorrelacaoPage() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">{pageTitle}</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">
@@ -1037,7 +1044,7 @@ export default function CorrelacaoPage() {
           </div>
           <div className="flex items-center gap-2 flex-wrap" data-pdf-hide>
             <ExportPdfButton filename="gps-resultado" />
-            <button onClick={() => router.push('/fisiologia')}
+            <button onClick={() => router.push(href('/fisiologia'))}
               className="bg-slate-200 text-slate-800 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
@@ -1051,7 +1058,7 @@ export default function CorrelacaoPage() {
         {/* CAPA / RESUMO EXECUTIVO — só no PDF */}
         <section className="hidden print:block border border-slate-200 rounded-xl p-5">
           <p className="text-[10px] font-black uppercase tracking-widest text-amber-600">Relatório · GPS × Resultado</p>
-          <h2 className="text-xl font-black uppercase tracking-tight text-slate-800">Grêmio Novorizontino · Fisiologia</h2>
+          <h2 className="text-xl font-black uppercase tracking-tight text-slate-800"><SeasonClub /> · Fisiologia</h2>
           <p className="text-xs text-slate-500 font-medium mt-1">Categoria profissional · Exportado em {exportDate}</p>
           <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
             <p><strong>Filtros aplicados:</strong> Competição {fCompTxt} · Mando {fMandoTxt} · Resultado {fResultTxt} · {fLastTxt}</p>
@@ -1229,7 +1236,7 @@ export default function CorrelacaoPage() {
           <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-slate-200 rounded-xl">
             <p className="text-4xl mb-4">📊</p>
             <p className="text-slate-600 font-black uppercase tracking-widest text-sm mb-2">Dados insuficientes</p>
-            <p className="text-slate-400 text-xs font-medium max-w-xs">Suba CSVs de jogos com resultado (V/E/D) para começar a análise.</p>
+            <p className="text-slate-400 text-xs font-medium max-w-xs">Importe CSVs de jogos com resultado (V/E/D).</p>
           </div>
         ) : filteredGames.length === 0 ? (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700 font-bold">
@@ -1384,7 +1391,7 @@ export default function CorrelacaoPage() {
               <div className="border border-slate-100 rounded-xl overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-100 px-4 py-3">
                   <h2 className="text-sm font-black uppercase tracking-widest text-slate-800">Leitura por Tipo de Métrica</h2>
-                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">O que sobe nas vitórias, o que sobe nas derrotas e o que não tem padrão claro</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Variação das métricas por resultado: vitória, empate e derrota</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
                   {categoryReadings.map(cat => (

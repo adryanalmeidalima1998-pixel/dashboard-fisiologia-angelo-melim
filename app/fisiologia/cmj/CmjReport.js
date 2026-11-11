@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -46,6 +49,10 @@ function fmtData(d) {
 const first2 = (n) => n.split(' ').slice(0, 2).join(' ')
 
 export default function CmjReport({ comColeta = [], zoneCounts = {}, playerPositions = {} }) {
+  const { season } = useSeason()
+
+  const GOLD = season.theme === 'americano' ? '#E4E4E7' : '#F5B50A'
+
   const pageRefs = useRef([])
   const donutFaixaRef = useRef(null)
   const barDistRef    = useRef(null)
@@ -248,7 +255,7 @@ export default function CmjReport({ comColeta = [], zoneCounts = {}, playerPosit
     return (
       <div className="py-20 text-center border-2 border-slate-200 rounded-2xl">
         <p className="text-slate-400 text-sm font-black uppercase tracking-widest">Sem coletas para gerar o relatório</p>
-        <p className="text-slate-300 text-xs font-bold mt-1">Registre coletas para liberar o relatório visual</p>
+        <p className="text-slate-300 text-xs font-bold mt-1">Sem coletas de CMJ para gerar o relatório</p>
       </div>
     )
   }
@@ -266,9 +273,9 @@ export default function CmjReport({ comColeta = [], zoneCounts = {}, playerPosit
   const Header = ({ sub }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `3px solid ${GOLD}`, paddingBottom: 14, marginBottom: 18 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <img src="/club/escudonovorizontino.png" alt="Escudo" style={{ height: 60, width: 'auto' }} crossOrigin="anonymous" />
+        <SeasonLogo alt="Escudo" style={{ height: 60, width: 'auto' }} crossOrigin="anonymous" />
         <div>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 3, color: GOLD, textTransform: 'uppercase' }}>Grêmio Novorizontino · Fisiologia</div>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 3, color: GOLD, textTransform: 'uppercase' }}><SeasonClub /> · Fisiologia</div>
           <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: -1, lineHeight: 1, textTransform: 'uppercase' }}>Relatório de Fadiga · CMJ</div>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: TXT2, textTransform: 'uppercase', marginTop: 3 }}>{sub}</div>
         </div>
@@ -283,7 +290,7 @@ export default function CmjReport({ comColeta = [], zoneCounts = {}, playerPosit
   const Foot = ({ p }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 12, borderTop: `2px solid ${BORDER}` }}>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5, color: TXT3, textTransform: 'uppercase' }}>Departamento de Saúde e Performance · CMJ Counter Movement Jump · GPS Catapult integrado</div>
-      <div style={{ fontSize: 10, fontWeight: 900, fontStyle: 'italic', color: GOLD, textTransform: 'uppercase' }}>Tigre do Vale · {p}</div>
+      <div style={{ fontSize: 10, fontWeight: 900, fontStyle: 'italic', color: GOLD, textTransform: 'uppercase' }}>{season.shortName} · {season.year} · {p}</div>
     </div>
   )
 

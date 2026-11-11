@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -56,6 +59,8 @@ function StatCard({ label, value, unit = '', sub, color = 'text-black', bg = 'bg
 
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 export default function JogosPage() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, bemEstarData, vmaxBaseline, isExcluded } = useData()
   const [selectedGameId, setSelectedGameId] = useState(null)
@@ -177,7 +182,7 @@ export default function JogosPage() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Dashboard de Jogos</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Análise pós-jogo & Recuperação</p>
@@ -185,7 +190,7 @@ export default function JogosPage() {
           </div>
           <div className="flex items-center gap-2">
             <ExportPdfButton filename="dashboard-jogos" />
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
           </div>
         </header>
 
@@ -256,7 +261,7 @@ export default function JogosPage() {
                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Jogo selecionado</p>
                     <div className="flex items-center gap-3 flex-wrap">
                       <h2 className="text-2xl font-black text-black">
-                        Novorizontino vs {opponent}
+                        <SeasonClub /> vs {opponent}
                       </h2>
                       {result && <ResultBadge result={result} />}
                     </div>
@@ -333,7 +338,7 @@ export default function JogosPage() {
                           {gameGps.map((r, i) => (
                             <tr key={i}
                               className={`border-b border-slate-100 cursor-pointer hover:bg-amber-50 transition-colors ${r.achieved90 ? 'bg-green-50/40' : ''}`}
-                              onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(r.playerName)}`)}>
+                              onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(r.playerName)}`))}>
                               <td className="py-2 pr-3 font-bold">
                                 <div className="flex items-center gap-2">
                                   <AthleteAvatar name={r.playerName} size="w-7 h-7" />
@@ -484,7 +489,7 @@ export default function JogosPage() {
                           return (
                             <div key={r.playerName}
                               className={`border rounded-xl p-3 cursor-pointer hover:shadow-md transition-all ${wsBg}`}
-                              onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(r.playerName)}`)}>
+                              onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(r.playerName)}`))}>
                               <div className="flex items-center gap-2 mb-2">
                                 <AthleteAvatar name={r.playerName} size="w-8 h-8" />
                                 <div className="flex-1 min-w-0">

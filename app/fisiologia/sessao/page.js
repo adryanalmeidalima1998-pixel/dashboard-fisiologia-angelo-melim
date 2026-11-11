@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useMemo, Suspense } from 'react'
@@ -112,6 +115,8 @@ function MetricBarChart({ data, metric, avg, onAthleteClick }) {
 
 // ─── PÁGINA ──────────────────────────────────────────────────────────────────
 function SessaoContent() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const params = useSearchParams()
   const { gpsData, vmaxBaseline, playerPositions, isExcluded } = useData()
@@ -212,7 +217,7 @@ function SessaoContent() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Sessão GPS</h1>
               <p className="text-sm font-bold tracking-widest text-slate-500 uppercase">Métricas da Sessão em Gráfico</p>
@@ -220,7 +225,7 @@ function SessaoContent() {
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <ExportPdfButton filename="sessao-gps" />
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1.5 rounded-md text-xs font-black hover:bg-slate-300 transition-colors">
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1.5 rounded-md text-xs font-black hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
           </div>
@@ -379,7 +384,7 @@ function SessaoContent() {
                     data={chartData}
                     metric={metric}
                     avg={avg}
-                    onAthleteClick={name => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`)}
+                    onAthleteClick={name => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`))}
                   />
                 </div>
               )
@@ -419,7 +424,7 @@ function SessaoContent() {
                     <tr
                       key={a.playerName}
                       className={`border-b border-slate-100 cursor-pointer hover:bg-amber-50 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}`}
-                      onClick={() => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(a.playerName)}`)}
+                      onClick={() => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(a.playerName)}`))}
                     >
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-2">

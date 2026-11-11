@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -210,6 +213,8 @@ function InjuryBodyMap({ injuries, onSelectRegion, selectedRegion, interactive =
 
 // ─── MODAL DE ATLETA ──────────────────────────────────────────────────────────
 function AthleteModal({ athlete, onClose, onSave }) {
+  const { apiFetch } = useSeason()
+
   const [form, setForm] = useState({
     name: '',
     full_name: '',
@@ -234,7 +239,7 @@ function AthleteModal({ athlete, onClose, onSave }) {
     try {
       const url = athlete?.id ? `/api/athletes/${athlete.id}` : '/api/athletes'
       const method = athlete?.id ? 'PUT' : 'POST'
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, weight_kg: form.weight_kg || null, height_cm: form.height_cm || null }),
@@ -337,6 +342,8 @@ function AthleteModal({ athlete, onClose, onSave }) {
 
 // ─── MODAL DE LESÃO ───────────────────────────────────────────────────────────
 function InjuryModal({ athleteName, onClose, onSave }) {
+  const { apiFetch } = useSeason()
+
   const [selectedRegion, setSelectedRegion] = useState(null)
   const [form, setForm] = useState({
     injury_date: new Date().toISOString().split('T')[0],
@@ -357,7 +364,7 @@ function InjuryModal({ athleteName, onClose, onSave }) {
     setSaving(true)
     setError('')
     try {
-      const res = await fetch('/api/injury-history', {
+      const res = await apiFetch('/api/injury-history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -510,6 +517,8 @@ function SeverityBadge({ severity }) {
 
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────────
 export default function AtletasPage() {
+  const { apiFetch, href } = useSeason()
+
   const router = useRouter()
   const [athletes, setAthletes] = useState([])
   const [injuries, setInjuries] = useState([])
@@ -531,8 +540,8 @@ export default function AtletasPage() {
     setLoading(true)
     try {
       const [aRes, iRes] = await Promise.all([
-        fetch('/api/athletes'),
-        fetch('/api/injury-history'),
+        apiFetch('/api/athletes'),
+        apiFetch('/api/injury-history'),
       ])
       const aData = await aRes.json()
       const iData = await iRes.json()
@@ -580,7 +589,7 @@ export default function AtletasPage() {
   async function handleDeleteAthlete(athlete) {
     if (!confirm(`Deletar ${athlete.name}? Isso remove o atleta e todo o histórico de lesões.`)) return
     try {
-      await fetch(`/api/athletes/${athlete.id}`, { method: 'DELETE' })
+      await apiFetch(`/api/athletes/${athlete.id}`, { method: 'DELETE' })
       setAthletes(prev => prev.filter(a => a.id !== athlete.id))
       setInjuries(prev => prev.filter(i => i.athlete_name !== athlete.name))
       if (selectedAthlete?.id === athlete.id) setSelectedAthlete(null)
@@ -593,7 +602,7 @@ export default function AtletasPage() {
     if (!confirm('Deletar este registro de lesão?')) return
     setDeletingInjury(injury.id)
     try {
-      await fetch(`/api/injury-history/${injury.id}`, { method: 'DELETE' })
+      await apiFetch(`/api/injury-history/${injury.id}`, { method: 'DELETE' })
       setInjuries(prev => prev.filter(i => i.id !== injury.id))
     } catch (err) {
       console.error(err)
@@ -615,7 +624,7 @@ export default function AtletasPage() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Cadastro de Atletas</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Perfil & Histórico de Lesões</p>
@@ -623,7 +632,7 @@ export default function AtletasPage() {
           </div>
           <div className="flex items-center gap-2">
             <ExportPdfButton filename="cadastro-atletas" />
-            <button onClick={() => router.push('/fisiologia')}
+            <button onClick={() => router.push(href('/fisiologia'))}
               className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>

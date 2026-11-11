@@ -1,9 +1,9 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // DELETE /api/cmj/[id]?table=coletas|baseline
-export async function DELETE(request, { params }) {
+export const DELETE = withSeason(async function DELETE(request, { params }) {
   try {
-    const id    = parseInt(params.id)
+    const id    = parseInt((await params).id)
     const table = new URL(request.url).searchParams.get('table') || 'coletas'
 
     if (isNaN(id) || id <= 0)
@@ -20,4 +20,4 @@ export async function DELETE(request, { params }) {
     console.error('CMJ DELETE error:', err)
     return Response.json({ error: 'Erro ao remover.' }, { status: 500 })
   }
-}
+})

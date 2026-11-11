@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
@@ -60,6 +63,8 @@ function colorForFactor(f) {
 }
 
 export default function PlanejamentoCarga() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, playerPositions } = useData()
 
@@ -155,7 +160,7 @@ export default function PlanejamentoCarga() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3 flex-wrap gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">
                 Planejamento de Carga
@@ -166,7 +171,7 @@ export default function PlanejamentoCarga() {
             </div>
           </div>
           <button
-            onClick={() => router.push('/fisiologia')}
+            onClick={() => router.push(href('/fisiologia'))}
             className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors"
           >
             ← VOLTAR

@@ -1,7 +1,7 @@
-import { sql } from '@vercel/postgres'
+import { sql, withSeason } from '@/lib/season-server'
 
 // PUT /api/athletes/[id]
-export async function PUT(request, { params }) {
+export const PUT = withSeason(async function PUT(request, { params }) {
   try {
     const { id } = await params
     const body = await request.json()
@@ -30,10 +30,10 @@ export async function PUT(request, { params }) {
     console.error('Athletes PUT error:', err)
     return Response.json({ error: 'Erro ao atualizar atleta.' }, { status: 500 })
   }
-}
+})
 
 // DELETE /api/athletes/[id]
-export async function DELETE(request, { params }) {
+export const DELETE = withSeason(async function DELETE(request, { params }) {
   try {
     const { id } = await params
     // Deleta lesões associadas primeiro
@@ -45,4 +45,4 @@ export async function DELETE(request, { params }) {
     console.error('Athletes DELETE error:', err)
     return Response.json({ error: 'Erro ao deletar atleta.' }, { status: 500 })
   }
-}
+})

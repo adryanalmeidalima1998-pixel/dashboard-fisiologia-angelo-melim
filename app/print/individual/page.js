@@ -1,4 +1,6 @@
 'use client'
+import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+
 
 import { useSearchParams } from 'next/navigation'
 import { useState, useMemo, useEffect, Suspense } from 'react'
@@ -266,9 +268,9 @@ function PrintContent() {
         {/* Header */}
         <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,paddingBottom:12,borderBottom:'2.5px solid #f1f5f9' }}>
           <div style={{ display:'flex',alignItems:'center',gap:12 }}>
-            <img src="/club/escudonovorizontino.png" alt="" style={{ height:44,width:'auto' }} />
+            <SeasonLogo alt="" style={{ height:44,width:'auto' }} />
             <div>
-              <div style={{ fontSize:7,fontWeight:900,letterSpacing:'0.12em',textTransform:'uppercase',color:'#94a3b8',marginBottom:2 }}>Grêmio Novorizontino · Fisiologia</div>
+              <div style={{ fontSize:7,fontWeight:900,letterSpacing:'0.12em',textTransform:'uppercase',color:'#94a3b8',marginBottom:2 }}><SeasonClub /> · Fisiologia</div>
               <div style={{ fontSize:19,fontWeight:900,letterSpacing:'-0.03em',color:'#0f172a',lineHeight:1 }}>Relatório GPS Individual</div>
               <div style={{ fontSize:10,fontWeight:600,color:'#64748b',marginTop:2 }}>{periodoLabel} · {geradoEm}</div>
             </div>
@@ -382,7 +384,7 @@ function PrintContent() {
         </div>
 
         <div style={{ marginTop:10,paddingTop:8,borderTop:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between' }}>
-          <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>Fisiologia · Grêmio Novorizontino · {geradoEm}</span>
+          <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>Fisiologia · <SeasonClub /> · {geradoEm}</span>
           <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>1 / 2</span>
         </div>
       </div>
@@ -394,7 +396,7 @@ function PrintContent() {
         {/* Mini header */}
         <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,paddingBottom:10,borderBottom:'2px solid #f1f5f9' }}>
           <div style={{ display:'flex',alignItems:'center',gap:10 }}>
-            <img src="/club/escudonovorizontino.png" alt="" style={{ height:30,width:'auto' }} />
+            <SeasonLogo alt="" style={{ height:30,width:'auto' }} />
             <div>
               <div style={{ fontSize:7,fontWeight:900,letterSpacing:'0.1em',textTransform:'uppercase',color:'#94a3b8' }}>Relatório GPS Individual · Pág. 2</div>
               <div style={{ fontSize:14,fontWeight:900,letterSpacing:'-0.02em',color:'#0f172a' }}>
@@ -573,7 +575,7 @@ function PrintContent() {
         </div>
 
         <div style={{ marginTop:10,paddingTop:8,borderTop:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between' }}>
-          <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>Fisiologia · Grêmio Novorizontino · {geradoEm}</span>
+          <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>Fisiologia · <SeasonClub /> · {geradoEm}</span>
           <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>2 / 2</span>
         </div>
       </div>

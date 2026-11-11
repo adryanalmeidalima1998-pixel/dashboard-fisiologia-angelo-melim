@@ -1,107 +1,26 @@
 'use client'
-
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-
+import { ArrowRight, Eye, EyeOff, LockKeyhole } from 'lucide-react'
+import { OWNER } from '@/lib/seasons.mjs'
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [erro, setErro] = useState('')
-  const [carregando, setCarregando] = useState(false)
-  const router = useRouter()
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setCarregando(true)
-    setErro('')
-
-    const result = await signIn('credentials', {
-      username,
-      password,
-      redirect: false,
-    })
-
-    if (result.error) {
-      setErro('USUÁRIO OU SENHA INCORRETOS')
-      setCarregando(false)
-    } else {
-      router.push('/')
-    }
+  const [show, setShow] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  async function submit(event) {
+    event.preventDefault(); setLoading(true); setError('')
+    try {
+      const result = await signIn('credentials', { username, password, redirect: false })
+      if (!result || result.error) { setError('Não foi possível entrar. Confira seu usuário e sua senha.'); return }
+      try { sessionStorage.removeItem('angelo:season') } catch {}
+      window.location.assign('/temporadas')
+    } catch { setError('Falha de conexão. Tente novamente.') }
+    finally { setLoading(false) }
   }
-
-  return (
-    <div className="min-h-screen bg-[#0a0c10] text-white flex items-center justify-center p-6 font-sans selection:bg-brand-yellow/30">
-      <div className="w-full max-w-md">
-        {/* LOGO E HEADER */}
-        <div className="text-center mb-12">
-          <div className="relative w-32 h-32 mx-auto mb-8 group">
-            <div className="absolute inset-0 bg-brand-yellow/20 rounded-full blur-2xl group-hover:bg-brand-yellow/40 transition-all duration-500"></div>
-            <div className="relative bg-slate-900 p-4 rounded-full border border-slate-800 shadow-2xl">
-              <img 
-                src="/club/escudonovorizontino.png" 
-                alt="Novorizontino Logo" 
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  e.target.src = "https://upload.wikimedia.org/wikipedia/pt/8/89/Gremio_Novorizontino_2010.png"
-                }}
-              />
-            </div>
-          </div>
-          <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none bg-gradient-to-r from-white via-white to-slate-500 bg-clip-text text-transparent">
-            Performance <span className="text-brand-yellow">Hub</span>
-          </h1>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-4 italic">Acesso Restrito à Comissão Técnica</p>
-        </div>
-
-        {/* FORMULÁRIO */}
-        <div className="bg-slate-900/30 rounded-[2.5rem] p-10 border border-slate-800/50 backdrop-blur-sm shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-2">Identificação</label>
-              <input 
-                type="text" 
-                placeholder="USUÁRIO" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-widest focus:border-brand-yellow/50 outline-none transition-all"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-2">Chave de Acesso</label>
-              <input 
-                type="password" 
-                placeholder="SENHA" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-widest focus:border-brand-yellow/50 outline-none transition-all"
-                required
-              />
-            </div>
-
-            {erro && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
-                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">{erro}</span>
-              </div>
-            )}
-
-            <button 
-              type="submit"
-              disabled={carregando}
-              className="w-full bg-brand-yellow hover:bg-brand-yellow/80 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-black italic uppercase text-[11px] tracking-widest py-5 rounded-2xl transition-all shadow-[0_0_30px_rgba(251,191,36,0.2)] active:scale-95"
-            >
-              {carregando ? 'AUTENTICANDO...' : 'ENTRAR NO SISTEMA'}
-            </button>
-          </form>
-        </div>
-
-        {/* FOOTER */}
-        <p className="text-center text-slate-600 text-[8px] font-bold uppercase tracking-[0.3em] mt-12 italic">
-          Grêmio Novorizontino • Gestão de Alta Performance
-        </p>
-      </div>
-    </div>
-  )
+  return <div className="login-shell">
+    <section className="login-editorial"><div className="personal-wordmark"><span className="am-mark">AM<span>·</span></span><div><strong>{OWNER.name}</strong><small>FISIOLOGIA & PERFORMANCE</small></div></div><div className="login-story"><div className="eyebrow">PREPARAÇÃO FÍSICA E FISIOLOGIA</div><h1>Central de<br /><span>fisiologia</span></h1><p>Atletas, sessões, avaliações físicas<br />e relatórios por temporada.</p><div className="login-track" aria-hidden="true"><i /><i /><i /></div></div><div className="login-signature"><strong>{OWNER.name}</strong><span>{OWNER.role}</span></div></section>
+    <main className="login-form-side"><form className="login-form" onSubmit={submit}><span className="login-lock"><LockKeyhole size={21} /></span><p className="eyebrow">ACESSO PESSOAL</p><h2>Acesso ao sistema</h2><p className="login-help">Informe seu usuário e sua senha.</p><label htmlFor="username">Usuário</label><input id="username" name="username" autoComplete="username" placeholder="Seu usuário" value={username} onChange={e=>setUsername(e.target.value)} required autoCapitalize="none" spellCheck={false} /><label htmlFor="password">Senha</label><div className="password-field"><input id="password" name="password" autoComplete="current-password" type={show?'text':'password'} placeholder="Sua senha" value={password} onChange={e=>setPassword(e.target.value)} required /><button type="button" aria-label={show?'Ocultar senha':'Mostrar senha'} onClick={()=>setShow(!show)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></div>{error&&<p role="alert" className="login-error">{error}</p>}<button className="login-submit" disabled={loading}>{loading?'Entrando…':'Entrar no dashboard'}<ArrowRight size={19}/></button></form><span className="login-bottom">ÂNGELO MELIM · FISIOLOGIA</span></main>
+  </div>
 }

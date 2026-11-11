@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -34,6 +37,8 @@ function daysAgo(dateStr) {
 }
 
 export default function RelatoriosPage() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, bemEstarData, vmaxBaseline, isExcluded } = useData()
   const [activeReport, setActiveReport] = useState('pos-sessao')
@@ -192,19 +197,19 @@ export default function RelatoriosPage() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Relatórios Automáticos</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Pós-Sessão · Pós-Jogo · Semanal · Individual</p>
             </div>
           </div>
-          <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+          <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
         </header>
 
         {/* RECOMENDAÇÕES AUTOMÁTICAS */}
         {recommendations.length > 0 && (
           <div className="border-2 border-amber-300 bg-amber-50 rounded-xl p-4">
-            <p className="text-xs font-black uppercase tracking-widest text-amber-700 mb-3">🤖 Recomendações Automáticas — Você valida, não obedece cegamente</p>
+            <p className="text-xs font-black uppercase tracking-widest text-amber-700 mb-3">Recomendações automáticas — revisão pela comissão técnica</p>
             <div className="flex flex-col gap-2">
               {recommendations.map((rec, i) => {
                 const colors = { warning: 'bg-amber-100 border-amber-300 text-amber-800', info: 'bg-blue-50 border-blue-200 text-blue-700', velocity: 'bg-red-50 border-red-200 text-red-700', danger: 'bg-red-100 border-red-300 text-red-800' }

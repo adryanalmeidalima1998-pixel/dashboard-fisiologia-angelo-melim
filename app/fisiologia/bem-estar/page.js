@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo, useEffect } from 'react'
@@ -55,6 +58,8 @@ function MetricBar({ value, max = 5, invert = false, label }) {
 }
 
 export default function BemEstarPage() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { bemEstarData, isLoadingBemEstar, fetchBemEstar, playerPositions, isExcluded } = useData()
   const [selectedDate, setSelectedDate] = useState('')
@@ -134,14 +139,14 @@ export default function BemEstarPage() {
         {/* HEADER */}
         <header className="flex justify-between items-center border-b-4 border-amber-500 pb-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Bem-Estar & sRPE</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Monitoramento de Prontidão</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
             <div className="flex flex-col items-end gap-0.5">

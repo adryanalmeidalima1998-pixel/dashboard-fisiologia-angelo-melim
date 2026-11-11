@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -152,6 +155,8 @@ function RankingSection({ title, emoji, athletes, metric, avg, isTop, onAthleteC
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function DestaquesDashboard() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, playerPositions, vmaxBaseline, isExcluded } = useData()
 
@@ -286,7 +291,7 @@ export default function DestaquesDashboard() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Destaques</h1>
               <p className="text-sm font-bold tracking-widest text-slate-500 uppercase">Top 5 · Bottom 5 por Métrica</p>
@@ -295,7 +300,7 @@ export default function DestaquesDashboard() {
           <div className="flex items-center gap-2">
             <ExportPdfButton filename="destaques-sessao" />
             <button
-              onClick={() => router.push('/fisiologia')}
+              onClick={() => router.push(href('/fisiologia'))}
               className="bg-slate-200 text-slate-800 px-3 py-1.5 rounded-md text-xs font-black hover:bg-slate-300 transition-colors"
             >
               ← VOLTAR
@@ -471,7 +476,7 @@ export default function DestaquesDashboard() {
                 metric={metric}
                 avg={avg}
                 isTop={true}
-                onAthleteClick={name => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`)}
+                onAthleteClick={name => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`))}
               />
             </div>
 
@@ -496,7 +501,7 @@ export default function DestaquesDashboard() {
                 metric={metric}
                 avg={avg}
                 isTop={false}
-                onAthleteClick={name => router.push(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`)}
+                onAthleteClick={name => router.push(href(`/fisiologia/individual?atleta=${encodeURIComponent(name)}`))}
               />
             </div>
 

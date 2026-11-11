@@ -1,2 +1,3 @@
 import { redirect } from 'next/navigation'
-export default function RootPage() { redirect('/fisiologia') }
+import { getOwnerSession } from '@/lib/auth'
+export default async function RootPage() { redirect((await getOwnerSession()) ? '/temporadas' : '/login') }

@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { SeasonLogo } from '@/components/SeasonBrand'
+
 
 import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
@@ -41,6 +44,8 @@ function SortTh({ label, col, sort, onSort }) {
 }
 
 export default function ExposicaoDashboard() {
+  const { href } = useSeason()
+
   const router = useRouter()
   const { gpsData, bemEstarData, vmaxBaseline, playerPositions, isExcluded } = useData()
   const [sortMain, setSortMain] = useState({ col: 'diasSemVmax90', dir: 'desc' })
@@ -170,14 +175,14 @@ export default function ExposicaoDashboard() {
         {/* HEADER */}
         <header className="flex flex-wrap justify-between items-center border-b-4 border-amber-500 pb-3 gap-3">
           <div className="flex items-center gap-4">
-            <img src="/club/escudonovorizontino.png" alt="Escudo" className="h-14 w-auto" />
+            <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Dashboard de Exposição</h1>
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Velocidade · Sprint · HSR · Risco de Destreino</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => router.push('/fisiologia')} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+            <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
           </div>
         </header>
 

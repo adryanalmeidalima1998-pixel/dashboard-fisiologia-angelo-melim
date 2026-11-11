@@ -1,4 +1,7 @@
 'use client'
+import { useSeason } from '@/app/context/SeasonContext'
+import { LEGACY_SEASON_ID, seasonStorage, storageKey } from '@/lib/seasons.mjs'
+
 
 import { useState, useEffect, useRef } from 'react'
 
@@ -82,7 +85,8 @@ export function normalizeKey(name) {
     .toLowerCase()
 }
 
-export function getStaticPhoto(playerName) {
+export function getStaticPhoto(playerName, seasonId) {
+  if (seasonId !== LEGACY_SEASON_ID) return null
   if (!playerName) return null
   const key = normalizeKey(playerName)
   if (PHOTO_MAP[key]) return '/club/' + PHOTO_MAP[key]
@@ -95,26 +99,26 @@ export function getStaticPhoto(playerName) {
 }
 
 // Alias retrocompatível
-export function getAthletePhoto(playerName) { return getStaticPhoto(playerName) }
+export function getAthletePhoto(playerName, seasonId) { return getStaticPhoto(playerName, seasonId) }
 
-export function photoStorageKey(name) { return 'aphoto_' + normalizeKey(name) }
+export function photoStorageKey(name, seasonId) { return storageKey(seasonId, 'aphoto_' + normalizeKey(name)) }
 
-export function getCustomPhoto(name) {
+export function getCustomPhoto(name, seasonId) {
   if (typeof window === 'undefined') return null
-  try { return localStorage.getItem(photoStorageKey(name)) || null } catch { return null }
+  try { return seasonStorage(localStorage, seasonId).getItem('aphoto_' + normalizeKey(name)) || null } catch { return null }
 }
 
-export function saveCustomPhoto(name, dataUrl) {
+export function saveCustomPhoto(name, dataUrl, seasonId) {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(photoStorageKey(name), dataUrl)
+    seasonStorage(localStorage, seasonId).setItem('aphoto_' + normalizeKey(name), dataUrl)
     window.dispatchEvent(new CustomEvent('athlete-photo-updated', {
-      detail: { key: photoStorageKey(name), url: dataUrl, name }
+      detail: { key: photoStorageKey(name, seasonId), url: dataUrl, name }
     }))
   } catch (e) { console.warn('Erro ao salvar foto:', e) }
 }
 
-export function compressAndSave(name, file, onDone) {
+export function compressAndSave(name, file, onDone, seasonId) {
   const reader = new FileReader()
   reader.onload = (ev) => {
     const img = new Image()
@@ -126,7 +130,7 @@ export function compressAndSave(name, file, onDone) {
       canvas.height = Math.round(img.height * ratio)
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
       const dataUrl = canvas.toDataURL('image/jpeg', 0.88)
-      saveCustomPhoto(name, dataUrl)
+      saveCustomPhoto(name, dataUrl, seasonId)
       if (onDone) onDone(dataUrl)
     }
     img.src = ev.target.result
@@ -137,29 +141,30 @@ export function compressAndSave(name, file, onDone) {
 // ── AthleteAvatar ─────────────────────────────────────────────────────────────
 // clickable={true} habilita overlay de câmera + upload ao clicar
 export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring = false, clickable = true }) {
+  const { season } = useSeason()
   const [customPhoto, setCustomPhoto] = useState(null)
   const [hovered, setHovered]         = useState(false)
   const [saving, setSaving]           = useState(false)
   const fileRef = useRef(null)
 
   useEffect(() => {
-    setCustomPhoto(getCustomPhoto(name))
+    setCustomPhoto(getCustomPhoto(name, season.id))
     const handler = (e) => {
-      if (e.detail.key === photoStorageKey(name)) setCustomPhoto(e.detail.url)
+      if (e.detail.key === photoStorageKey(name, season.id)) setCustomPhoto(e.detail.url)
     }
     window.addEventListener('athlete-photo-updated', handler)
     return () => window.removeEventListener('athlete-photo-updated', handler)
-  }, [name])
+  }, [name, season.id])
 
   const handleFile = (e) => {
     const file = e.target.files?.[0]
     if (!file || !file.type.startsWith('image/')) return
     setSaving(true)
-    compressAndSave(name, file, (url) => { setCustomPhoto(url); setSaving(false) })
+    compressAndSave(name, file, (url) => { setCustomPhoto(url); setSaving(false) }, season.id)
     e.target.value = ''
   }
 
-  const photo    = customPhoto || getStaticPhoto(name)
+  const photo    = customPhoto || getStaticPhoto(name, season.id)
   const initials = name ? name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') : '?'
   const ringCls  = ring ? 'ring-2 ring-amber-400 ring-offset-1' : ''
 

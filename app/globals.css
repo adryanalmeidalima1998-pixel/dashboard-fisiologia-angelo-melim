@@ -44,3 +44,95 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #fbbf24;
 }
+
+/* Personal workspace: the existing Geist family is shared across all seasons. */
+body { font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif; }
+:root { --club-ink:#111113; --club-soft:#f5f5f5; }
+html[data-club="americano"] {
+  --brand-yellow:#d4d4d8; --brand-gold:#a1a1aa; --brand-accent:#52525b;
+  --color-amber-50:#fafafa; --color-amber-100:#f4f4f5; --color-amber-200:#e4e4e7;
+  --color-amber-300:#d4d4d8; --color-amber-400:#d4d4d8; --color-amber-500:#d4d4d8;
+  --color-amber-600:#52525b; --color-amber-700:#3f3f46; --color-amber-800:#27272a; --color-amber-900:#18181b;
+  --color-yellow-50:#fafafa; --color-yellow-100:#f4f4f5; --color-yellow-200:#e4e4e7;
+  --color-yellow-300:#d4d4d8; --color-yellow-400:#d4d4d8; --color-yellow-500:#a1a1aa;
+  --color-yellow-600:#52525b; --color-yellow-700:#3f3f46;
+}
+.club-active { background:#f59e0b; color:#111; }
+html[data-club="americano"] .club-active { background:#18181b; color:#fff; }
+html[data-club="americano"] aside { border-right-color:#18181b; }
+.gate-loading { min-height:100vh; display:grid; place-items:center; background:#f7f7f5; color:#52525b; font-size:14px; }
+.personal-shell { min-height:100vh; color:#18181b; background:#f7f7f5; }
+.personal-topbar { max-width:1320px; margin:auto; padding:32px 56px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #dededb; }
+.personal-wordmark { display:flex; align-items:center; gap:16px; }
+.am-mark { width:54px; height:54px; display:flex; align-items:center; justify-content:center; border:1px solid currentColor; font-size:20px; font-weight:700; letter-spacing:-2px; border-radius:50%; }
+.am-mark>span { margin-left:2px; color:#a1a1aa; }
+.personal-wordmark strong { display:block; font-size:17px; font-weight:650; letter-spacing:-.4px; }
+.personal-wordmark small { display:block; font-size:9px; letter-spacing:2.1px; margin-top:5px; color:#77777b; }
+.quiet-button { display:flex; align-items:center; gap:8px; padding:10px 16px; border:1px solid #dcdcdc; border-radius:7px; color:#52525b; font-size:13px; cursor:pointer; }
+.quiet-button:hover { background:#fff; }
+.seasons-main { max-width:1208px; margin:0 auto; padding:54px 0 25px; }
+.eyebrow { display:flex; align-items:center; gap:9px; font-size:10px; font-weight:600; letter-spacing:2px; color:#71717a; }
+.season-intro { display:flex; justify-content:space-between; align-items:flex-end; margin-top:22px; margin-bottom:37px; }
+.season-intro h1 { font-size:46px; line-height:1.12; letter-spacing:-2px; font-weight:650; }
+.season-intro h1 span { color:#929294; }
+.season-intro p { color:#71717a; font-size:14px; line-height:1.75; margin-top:18px; }
+.season-counter { display:flex; align-items:center; gap:16px; padding-bottom:5px; }
+.season-counter strong { font-size:54px; line-height:1; font-weight:400; letter-spacing:-3px; color:#a1a1aa; }
+.season-counter span { font-size:9px; line-height:1.7; letter-spacing:1.7px; color:#71717a; }
+.season-cards { display:grid; grid-template-columns:1fr 1fr; gap:25px; }
+.season-card { background:#fff; border:1px solid #dddeda; border-radius:12px; text-align:left; overflow:hidden; cursor:pointer; transition:transform .2s,box-shadow .2s; }
+.season-card:hover { transform:translateY(-4px); box-shadow:0 15px 30px #18181b0c; }
+.season-card:disabled { opacity:.7; cursor:wait; }
+.season-card:focus-visible { outline:3px solid #71717a; outline-offset:4px; }
+.season-card-top { padding:21px 25px 0; display:flex; align-items:center; justify-content:space-between; }
+.season-card-top>span { font-size:10px; font-weight:600; border:1px solid #e4e4e7; border-radius:20px; padding:6px 11px; color:#71717a; }
+.season-card-visual { height:188px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.season-year-watermark { position:absolute; font-size:145px; font-weight:750; letter-spacing:-9px; color:#f4f4f3; line-height:1; }
+.season-card-visual img { width:100px; height:132px; position:relative; object-fit:contain; filter:drop-shadow(0 6px 3px #00000008); }
+.season-card.novorizontino { border-top:4px solid #e9ac23; }
+.season-card.americano { border-top:4px solid #19191b; }
+.season-card-copy { display:flex; align-items:center; justify-content:space-between; padding:4px 28px 28px; }
+.season-year-label { font-size:10px; letter-spacing:1.8px; font-weight:600; color:#71717a; }
+.season-card-copy h2 { font-size:29px; letter-spacing:-1px; font-weight:650; margin-top:6px; }
+.season-card-copy p { font-size:12px; color:#71717a; margin-top:5px; }
+.season-enter { display:grid; place-items:center; width:43px; height:43px; border:1px solid #e4e4e7; border-radius:50%; margin-top:24px; }
+.season-card:hover .season-enter { background:#18181b; color:white; border-color:#18181b; }
+.season-card-bottom { border-top:1px solid #efefed; display:flex; justify-content:space-between; padding:16px 28px; font-size:11px; font-weight:600; }
+.season-card-bottom span { color:#a1a1aa; font-weight:400; }
+.season-note { text-align:center; font-size:12px; color:#919196; margin-top:26px; }
+.personal-footer { max-width:1208px; margin:30px auto 0; border-top:1px solid #dededb; padding:23px 0 28px; display:flex; justify-content:space-between; font-size:11px; color:#919196; }
+.login-shell { min-height:100vh; display:grid; grid-template-columns:1.05fr 1fr; color:#18181b; background:#fafaf8; }
+.login-editorial { background:#151517; color:#fff; padding:44px 54px; display:flex; flex-direction:column; position:relative; overflow:hidden; }
+.login-editorial .personal-wordmark small { color:#929298; }
+.login-story { margin:auto 0; padding:65px 0; position:relative; z-index:1; }
+.login-story .eyebrow { color:#a1a1aa; font-size:9px; }
+.login-story h1 { font-size:clamp(34px,3.7vw,58px); line-height:1.1; letter-spacing:-2.8px; font-weight:550; margin-top:28px; }
+.login-story h1 span { color:#85858a; }
+.login-story p { color:#a1a1aa; font-size:14px; line-height:1.8; margin-top:24px; }
+.login-track { position:absolute; width:460px; height:360px; border:1px solid #ffffff09; border-radius:50%; transform:rotate(-35deg); left:35%; top:58%; z-index:-1; }
+.login-track i { position:absolute; inset:30px; border:1px solid #ffffff09; border-radius:50%; }
+.login-track i:nth-child(2) { inset:60px; }.login-track i:nth-child(3) { inset:90px; }
+.login-signature { display:flex; flex-direction:column; gap:6px; font-size:12px; }
+.login-signature span { font-size:11px; color:#818189; }
+.login-form-side { display:flex; align-items:center; justify-content:center; position:relative; padding:55px; }
+.login-form { width:100%; max-width:350px; }
+.login-lock { width:46px; height:46px; display:grid; place-items:center; border:1px solid #dededb; border-radius:12px; margin-bottom:26px; }
+.login-form h2 { font-size:29px; line-height:1.2; font-weight:600; letter-spacing:-1px; margin-top:12px; }
+.login-help { color:#85858a; font-size:13px; margin-top:12px; margin-bottom:34px; }
+.login-form label { display:block; font-size:12px; font-weight:600; margin-top:20px; margin-bottom:9px; }
+.login-form input { height:49px; border:1px solid #dededb; border-radius:7px; width:100%; padding:0 14px; background:#fff; color:#18181b; font-size:13px; outline:none; }
+.login-form input:focus { border-color:#52525b; box-shadow:0 0 0 3px #18181b08; }
+.login-form input::placeholder { color:#a1a1aa; }
+.password-field { position:relative; }.password-field input { padding-right:45px; }.password-field button { position:absolute; right:14px; top:15px; cursor:pointer; color:#71717a; }
+.login-submit { display:flex; justify-content:space-between; align-items:center; width:100%; background:#18181b; color:#fff; height:50px; padding:0 17px; font-size:12px; font-weight:600; border-radius:7px; margin-top:26px; cursor:pointer; }
+.login-submit:hover { background:#333336; }.login-submit:disabled { opacity:.6; cursor:wait; }
+.login-error { color:#b91c1c; background:#fff1f2; padding:10px; border-radius:5px; font-size:12px; margin-top:14px; }
+.login-footnote { font-size:10px; text-align:center; color:#a1a1aa; margin-top:25px; }
+.login-bottom { position:absolute; bottom:35px; font-size:8px; letter-spacing:2px; color:#a1a1aa; }
+.workspace-notice { padding:11px 20px; border-bottom:1px solid #e4e4e7; background:#fafafa; color:#52525b; font-size:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+.workspace-notice a { text-decoration:underline; font-weight:600; }
+@media(max-width:1300px){.seasons-main,.personal-footer{margin-left:56px;margin-right:56px;}.login-editorial{padding:40px;}}
+@media(max-width:767px){
+  .login-shell{display:flex;flex-direction:column;}.login-editorial{padding:24px;min-height:auto;}.login-story{padding:28px 0 8px;}.login-story h1{font-size:34px;letter-spacing:-1.5px;}.login-story p,.login-signature,.login-story .eyebrow{display:none;}.login-form-side{padding:35px 24px 70px;}.login-lock{display:none;}.login-bottom{bottom:24px;}.personal-wordmark strong{font-size:15px;}.personal-wordmark small{font-size:8px;}.am-mark{width:42px;height:42px;font-size:18px;}.personal-topbar{padding:22px 20px;}.seasons-main{padding-top:30px;margin:0 20px;}.season-intro{margin:18px 0 27px;}.season-intro h1{font-size:33px;letter-spacing:-1.4px;}.season-intro p{font-size:12px;}.season-counter{display:none;}.season-cards{grid-template-columns:1fr;gap:20px;}.season-card-visual{height:160px;}.season-card-copy h2{font-size:27px;}.season-year-watermark{font-size:132px;}.season-card-bottom span{display:none;}.season-card-copy{padding-bottom:22px;}.personal-footer{margin:30px 20px 0;font-size:10px;gap:20px;}.desktop-break{display:none;}.workspace-notice{font-size:11px;flex-wrap:wrap;padding:10px 12px;}
+}
+@media print{aside,.workspace-notice,.sidebar-personal{display:none!important;}}
