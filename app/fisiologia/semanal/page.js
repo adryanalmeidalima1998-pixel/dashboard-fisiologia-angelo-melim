@@ -114,7 +114,7 @@ function getDefaultCycleStart() {
 }
 
 export default function SemanalDashboard() {
-  const { storage, href } = useSeason()
+  const { storage, href, season } = useSeason()
 
   const router = useRouter()
   const dateStartRef = useRef(null)
