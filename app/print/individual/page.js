@@ -1,5 +1,6 @@
 'use client'
 import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+import AthravenBrand from '@/components/AthravenBrand'
 
 
 import { useSearchParams } from 'next/navigation'
@@ -385,6 +386,7 @@ function PrintContent() {
 
         <div style={{ marginTop:10,paddingTop:8,borderTop:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between' }}>
           <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>Fisiologia · <SeasonClub /> · {geradoEm}</span>
+          <AthravenBrand report license />
           <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>1 / 2</span>
         </div>
       </div>
@@ -576,6 +578,7 @@ function PrintContent() {
 
         <div style={{ marginTop:10,paddingTop:8,borderTop:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between' }}>
           <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>Fisiologia · <SeasonClub /> · {geradoEm}</span>
+          <AthravenBrand report license />
           <span style={{ fontSize:7,color:'#cbd5e1',fontWeight:600 }}>2 / 2</span>
         </div>
       </div>

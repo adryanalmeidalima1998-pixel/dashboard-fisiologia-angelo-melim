@@ -1,6 +1,7 @@
 'use client'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+import AthravenBrand from '@/components/AthravenBrand'
 
 
 import { useState } from 'react'
@@ -273,6 +274,7 @@ export default function Sidebar() {
         {!collapsed && <div className="hidden md:block px-2 py-2"><p className="text-[11px] font-bold text-black">Ângelo Melim</p><p className="text-[9px]">Fisiologia & performance</p></div>}
         <button title="Trocar temporada" onClick={() => window.location.assign('/temporadas')} className="w-full flex items-center justify-center md:justify-start gap-2 p-2 rounded-lg hover:bg-slate-100"><ArrowLeftRight size={17}/>{!collapsed && <span className="hidden md:inline text-[11px] font-bold">Trocar temporada</span>}</button>
         <button title="Sair" onClick={() => { try { sessionStorage.removeItem('angelo:season') } catch {} signOut({callbackUrl:'/login'}) }} className="w-full flex items-center justify-center md:justify-start gap-2 p-2 rounded-lg hover:bg-slate-100"><LogOut size={17}/>{!collapsed && <span className="hidden md:inline text-[11px] font-bold">Sair</span>}</button>
+        <div className={`sidebar-athraven ${collapsed ? 'sidebar-athraven--collapsed' : ''}`}><AthravenBrand sidebar license compact={collapsed} /></div>
       </div>
       {/* COLLAPSE BUTTON */}
       <div className="hidden md:block border-t-2 border-slate-100 p-2">

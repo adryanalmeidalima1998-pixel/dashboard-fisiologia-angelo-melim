@@ -1,6 +1,7 @@
 'use client'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo } from '@/components/SeasonBrand'
+import { addAthravenPdfFooter } from '@/lib/pdf-brand'
 
 
 import { useRouter } from 'next/navigation'
@@ -720,7 +721,7 @@ export default function SemanalDashboard() {
                         }
                       }
                     },
-                    margin: { left: 14, right: 14 },
+                    margin: { left: 14, right: 14, bottom: 20 },
                   })
 
                   let y = doc.lastAutoTable.finalY + 8
@@ -754,7 +755,7 @@ export default function SemanalDashboard() {
                       headStyles: { fillColor: [30,30,30], textColor: 255, fontStyle: 'bold' },
                       bodyStyles: { textColor: [40,40,40] },
                       rowPageBreak: 'avoid',
-                      margin: { left: 14, right: 14 },
+                      margin: { left: 14, right: 14, bottom: 20 },
                     })
                   }
 
@@ -781,14 +782,12 @@ export default function SemanalDashboard() {
                         styles: { fontSize: 7, cellPadding: 1.5 },
                         headStyles: { fillColor: [220, 38, 38], textColor: 255, fontStyle: 'bold' },
                         alternateRowStyles: { fillColor: [255, 245, 245] },
-                        margin: { left: 14, right: 14 },
+                        margin: { left: 14, right: 14, bottom: 20 },
                       })
                     }
                   }
 
-                  // ── Rodapé ──
-                  doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(150, 150, 150)
-                  doc.text(`Gerado em ${new Date().toLocaleDateString('pt-BR')} · Central de Fisiologia GN · Confidencial`, pageW / 2, pageH - 5, { align: 'center' })
+                  await addAthravenPdfFooter(doc, season)
 
                   doc.save(`relatorio-semanal-${monday.toISOString().split('T')[0]}.pdf`)
                 } catch(e) {

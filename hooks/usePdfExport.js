@@ -36,15 +36,13 @@ export function usePdfExport(filename = 'relatorio') {
         }
 
         /* Esconder a sidebar */
-        body > div > div:first-child,
         nav, aside,
         [data-sidebar] {
           display: none !important;
         }
 
         /* Main ocupa 100% */
-        body > div > main,
-        body > div > div:last-child {
+        .workspace-main, .workspace-content {
           width: 100% !important;
           overflow: visible !important;
           height: auto !important;

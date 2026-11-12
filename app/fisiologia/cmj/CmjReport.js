@@ -1,6 +1,7 @@
 'use client'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
+import AthravenBrand from '@/components/AthravenBrand'
 
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -289,7 +290,8 @@ export default function CmjReport({ comColeta = [], zoneCounts = {}, playerPosit
 
   const Foot = ({ p }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 12, borderTop: `2px solid ${BORDER}` }}>
-      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5, color: TXT3, textTransform: 'uppercase' }}>Departamento de Saúde e Performance · CMJ Counter Movement Jump · GPS Catapult integrado</div>
+      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5, color: TXT3, textTransform: 'uppercase' }}>Ângelo Melim · Preparação física e fisiologia</div>
+      <AthravenBrand report license dark />
       <div style={{ fontSize: 10, fontWeight: 900, fontStyle: 'italic', color: GOLD, textTransform: 'uppercase' }}>{season.shortName} · {season.year} · {p}</div>
     </div>
   )

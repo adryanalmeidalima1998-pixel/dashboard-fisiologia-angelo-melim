@@ -1,6 +1,7 @@
 'use client'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo } from '@/components/SeasonBrand'
+import AthravenBrand from '@/components/AthravenBrand'
 
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -451,6 +452,7 @@ export default function DecisaoClinicaRTP() {
 
         <footer className="mt-4 border-t border-yellow-500/70 pt-3 text-center text-[10px] font-black uppercase tracking-widest text-zinc-400">
           Decisão clínica RTP · Verde = progredir · Amarelo = manter · Vermelho = regredir · Documento gerado para discussão multidisciplinar
+          <div className="mt-3 flex justify-center normal-case tracking-normal"><AthravenBrand report license dark /></div>
         </footer>
       </div>
     </main>

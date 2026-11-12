@@ -136,3 +136,55 @@ html[data-club="americano"] aside { border-right-color:#18181b; }
   .login-shell{display:flex;flex-direction:column;}.login-editorial{padding:24px;min-height:auto;}.login-story{padding:28px 0 8px;}.login-story h1{font-size:34px;letter-spacing:-1.5px;}.login-story p,.login-signature,.login-story .eyebrow{display:none;}.login-form-side{padding:35px 24px 70px;}.login-lock{display:none;}.login-bottom{bottom:24px;}.personal-wordmark strong{font-size:15px;}.personal-wordmark small{font-size:8px;}.am-mark{width:42px;height:42px;font-size:18px;}.personal-topbar{padding:22px 20px;}.seasons-main{padding-top:30px;margin:0 20px;}.season-intro{margin:18px 0 27px;}.season-intro h1{font-size:33px;letter-spacing:-1.4px;}.season-intro p{font-size:12px;}.season-counter{display:none;}.season-cards{grid-template-columns:1fr;gap:20px;}.season-card-visual{height:160px;}.season-card-copy h2{font-size:27px;}.season-year-watermark{font-size:132px;}.season-card-bottom span{display:none;}.season-card-copy{padding-bottom:22px;}.personal-footer{margin:30px 20px 0;font-size:10px;gap:20px;}.desktop-break{display:none;}.workspace-notice{font-size:11px;flex-wrap:wrap;padding:10px 12px;}
 }
 @media print{aside,.workspace-notice,.sidebar-personal{display:none!important;}}
+
+/* ATHRAVEN identifies the software. Ângelo remains the license holder. */
+.athraven-signature { display:inline-flex; align-items:center; gap:12px; flex-shrink:0; color:#5c6470; text-align:left; line-height:1.4; }
+.athraven-signature__tile { display:flex; align-items:center; justify-content:center; width:53px; height:36px; padding:3px; flex-shrink:0; background:#000; border:1px solid #17191f; border-radius:2px; overflow:hidden; }
+.athraven-signature__tile img { display:block; width:100%; height:100%; object-fit:contain; }
+.athraven-signature__copy { display:flex; flex-direction:column; gap:3px; font-size:11px; }
+.athraven-signature__copy strong { font-size:11px; font-weight:750; letter-spacing:.25px; color:#374151; }
+.athraven-signature__copy small { color:#727780; font-size:10px; font-weight:400; letter-spacing:0; }
+.athraven-signature--dark { color:#a1a7b1; }
+.athraven-signature--dark .athraven-signature__copy strong { color:#e5e7eb; }
+.athraven-signature--dark .athraven-signature__copy small { color:#9ca3af; }
+.athraven-signature--compact .athraven-signature__tile,
+.athraven-signature--sidebar .athraven-signature__tile { width:32px; height:32px; padding:5px; border-radius:5px; }
+.athraven-signature--sidebar { gap:8px; }
+.athraven-signature--sidebar .athraven-signature__copy { gap:2px; }
+.athraven-signature--sidebar .athraven-signature__copy strong { font-size:10px; letter-spacing:.8px; }
+.athraven-signature--sidebar .athraven-signature__copy small { font-size:8px; }
+.athraven-signature--report { gap:8px; }
+.athraven-signature--report .athraven-signature__tile { width:42px; height:27px; padding:2px; }
+.athraven-signature--report .athraven-signature__copy,
+.athraven-signature--report .athraven-signature__copy strong { font-size:9px; }
+.athraven-signature--report .athraven-signature__copy small { font-size:8px; }
+.sidebar-athraven { border-top:1px solid #e5e7eb; margin-top:8px; padding:12px 4px 3px; }
+.sidebar-athraven--collapsed { display:flex; justify-content:center; padding-left:0; padding-right:0; }
+.workspace-main { display:flex; flex-direction:column; }
+.workspace-content { flex:1 0 auto; }
+.workspace-footer { display:flex; align-items:center; justify-content:space-between; gap:24px; border-top:1px solid #e5e7eb; padding:20px 28px; background:#fafbfc; color:#555d68; break-inside:avoid; }
+.workspace-footer__owner,.personal-footer__owner { display:flex; flex-direction:column; gap:4px; }
+.workspace-footer__owner strong { font-size:12px; font-weight:650; color:#27272a; }
+.workspace-footer__owner span { font-size:10px; color:#71717a; }
+.personal-footer { align-items:center; gap:24px; }
+.personal-footer__owner strong { color:#52525b; font-size:11px; font-weight:600; }
+.personal-footer__owner span { font-size:10px; }
+.login-shell { grid-template-rows:minmax(0,1fr) auto; }
+.login-brand-footer { grid-column:1 / -1; display:flex; align-items:center; justify-content:flex-end; padding:17px 54px; border-top:1px solid #e1e3e6; background:#f8fafc; }
+@media(max-width:767px) {
+  .sidebar-athraven { display:flex; justify-content:center; padding:10px 0 2px; }
+  .sidebar-athraven .athraven-signature__copy { display:none; }
+  .workspace-footer { padding:17px 18px; flex-wrap:wrap; gap:14px 22px; }
+  .workspace-footer__owner { flex-basis:100%; }
+  .login-brand-footer { justify-content:center; padding:17px 20px; }
+  .login-form-side { padding-bottom:35px; }
+  .personal-footer { flex-wrap:wrap; gap:18px; padding-bottom:24px; }
+}
+@media print {
+  .workspace-content { overflow:visible!important; }
+  .workspace-footer { background:#fff; padding:10px 0 0; margin-top:14px; }
+  .workspace-footer .athraven-signature__tile { width:42px; height:28px; }
+  .workspace-footer__owner strong,.workspace-footer .athraven-signature__copy strong { font-size:10px; }
+  .workspace-footer__owner span,.workspace-footer .athraven-signature__copy,.workspace-footer .athraven-signature__copy small { font-size:8px; }
+  .athraven-signature { break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}

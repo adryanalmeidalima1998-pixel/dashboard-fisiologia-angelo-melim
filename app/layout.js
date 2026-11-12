@@ -9,6 +9,7 @@ const geistMono = GeistMono;
 export const metadata = {
   title: "Ângelo Melim — Fisiologia & Performance",
   description: "Central de Fisiologia & Performance",
+  applicationName: "ATHRAVEN Performance — Ângelo Melim",
 };
 
 export default function RootLayout({ children }) {
