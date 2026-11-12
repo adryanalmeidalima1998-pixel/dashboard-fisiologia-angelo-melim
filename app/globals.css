@@ -101,64 +101,40 @@ html[data-club="americano"] aside { border-right-color:#18181b; }
 .season-card-bottom span { color:#a1a1aa; font-weight:400; }
 .season-note { text-align:center; font-size:12px; color:#919196; margin-top:26px; }
 .personal-footer { max-width:1208px; margin:30px auto 0; border-top:1px solid #dededb; padding:23px 0 28px; display:flex; justify-content:space-between; font-size:11px; color:#919196; }
-.login-shell { min-height:100vh; display:grid; grid-template-columns:1.05fr 1fr; color:#18181b; background:#fafaf8; }
-.login-editorial { background:#151517; color:#fff; padding:44px 54px; display:flex; flex-direction:column; position:relative; overflow:hidden; }
-.login-editorial .personal-wordmark small { color:#929298; }
-.login-story { margin:auto 0; padding:65px 0; position:relative; z-index:1; }
-.login-story .eyebrow { color:#a1a1aa; font-size:9px; }
-.login-story h1 { font-size:clamp(34px,3.7vw,58px); line-height:1.1; letter-spacing:-2.8px; font-weight:550; margin-top:28px; }
-.login-story h1 span { color:#85858a; }
-.login-story p { color:#a1a1aa; font-size:14px; line-height:1.8; margin-top:24px; }
-.login-track { position:absolute; width:460px; height:360px; border:1px solid #ffffff09; border-radius:50%; transform:rotate(-35deg); left:35%; top:58%; z-index:-1; }
-.login-track i { position:absolute; inset:30px; border:1px solid #ffffff09; border-radius:50%; }
-.login-track i:nth-child(2) { inset:60px; }.login-track i:nth-child(3) { inset:90px; }
-.login-signature { display:flex; flex-direction:column; gap:6px; font-size:12px; }
-.login-signature span { font-size:11px; color:#818189; }
-.login-form-side { display:flex; align-items:center; justify-content:center; position:relative; padding:55px; }
-.login-form { width:100%; max-width:350px; }
-.login-lock { width:46px; height:46px; display:grid; place-items:center; border:1px solid #dededb; border-radius:12px; margin-bottom:26px; }
-.login-form h2 { font-size:29px; line-height:1.2; font-weight:600; letter-spacing:-1px; margin-top:12px; }
-.login-help { color:#85858a; font-size:13px; margin-top:12px; margin-bottom:34px; }
-.login-form label { display:block; font-size:12px; font-weight:600; margin-top:20px; margin-bottom:9px; }
-.login-form input { height:49px; border:1px solid #dededb; border-radius:7px; width:100%; padding:0 14px; background:#fff; color:#18181b; font-size:13px; outline:none; }
-.login-form input:focus { border-color:#52525b; box-shadow:0 0 0 3px #18181b08; }
-.login-form input::placeholder { color:#a1a1aa; }
-.password-field { position:relative; }.password-field input { padding-right:45px; }.password-field button { position:absolute; right:14px; top:15px; cursor:pointer; color:#71717a; }
-.login-submit { display:flex; justify-content:space-between; align-items:center; width:100%; background:#18181b; color:#fff; height:50px; padding:0 17px; font-size:12px; font-weight:600; border-radius:7px; margin-top:26px; cursor:pointer; }
-.login-submit:hover { background:#333336; }.login-submit:disabled { opacity:.6; cursor:wait; }
-.login-error { color:#b91c1c; background:#fff1f2; padding:10px; border-radius:5px; font-size:12px; margin-top:14px; }
-.login-footnote { font-size:10px; text-align:center; color:#a1a1aa; margin-top:25px; }
-.login-bottom { position:absolute; bottom:35px; font-size:8px; letter-spacing:2px; color:#a1a1aa; }
 .workspace-notice { padding:11px 20px; border-bottom:1px solid #e4e4e7; background:#fafafa; color:#52525b; font-size:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
 .workspace-notice a { text-decoration:underline; font-weight:600; }
-@media(max-width:1300px){.seasons-main,.personal-footer{margin-left:56px;margin-right:56px;}.login-editorial{padding:40px;}}
+@media(max-width:1300px){.seasons-main,.personal-footer{margin-left:56px;margin-right:56px;}}
 @media(max-width:767px){
-  .login-shell{display:flex;flex-direction:column;}.login-editorial{padding:24px;min-height:auto;}.login-story{padding:28px 0 8px;}.login-story h1{font-size:34px;letter-spacing:-1.5px;}.login-story p,.login-signature,.login-story .eyebrow{display:none;}.login-form-side{padding:35px 24px 70px;}.login-lock{display:none;}.login-bottom{bottom:24px;}.personal-wordmark strong{font-size:15px;}.personal-wordmark small{font-size:8px;}.am-mark{width:42px;height:42px;font-size:18px;}.personal-topbar{padding:22px 20px;}.seasons-main{padding-top:30px;margin:0 20px;}.season-intro{margin:18px 0 27px;}.season-intro h1{font-size:33px;letter-spacing:-1.4px;}.season-intro p{font-size:12px;}.season-counter{display:none;}.season-cards{grid-template-columns:1fr;gap:20px;}.season-card-visual{height:160px;}.season-card-copy h2{font-size:27px;}.season-year-watermark{font-size:132px;}.season-card-bottom span{display:none;}.season-card-copy{padding-bottom:22px;}.personal-footer{margin:30px 20px 0;font-size:10px;gap:20px;}.desktop-break{display:none;}.workspace-notice{font-size:11px;flex-wrap:wrap;padding:10px 12px;}
+  .personal-wordmark strong{font-size:15px;}.personal-wordmark small{font-size:8px;}.am-mark{width:42px;height:42px;font-size:18px;}.personal-topbar{padding:22px 20px;}.seasons-main{padding-top:30px;margin:0 20px;}.season-intro{margin:18px 0 27px;}.season-intro h1{font-size:33px;letter-spacing:-1.4px;}.season-intro p{font-size:12px;}.season-counter{display:none;}.season-cards{grid-template-columns:1fr;gap:20px;}.season-card-visual{height:160px;}.season-card-copy h2{font-size:27px;}.season-year-watermark{font-size:132px;}.season-card-bottom span{display:none;}.season-card-copy{padding-bottom:22px;}.personal-footer{margin:30px 20px 0;font-size:10px;gap:20px;}.desktop-break{display:none;}.workspace-notice{font-size:11px;flex-wrap:wrap;padding:10px 12px;}
 }
 @media print{aside,.workspace-notice,.sidebar-personal{display:none!important;}}
 
-/* ATHRAVEN identifies the software. Ângelo remains the license holder. */
-.athraven-signature { display:inline-flex; align-items:center; gap:12px; flex-shrink:0; color:#5c6470; text-align:left; line-height:1.4; }
-.athraven-signature__tile { display:flex; align-items:center; justify-content:center; width:53px; height:36px; padding:3px; flex-shrink:0; background:#000; border:1px solid #17191f; border-radius:2px; overflow:hidden; }
-.athraven-signature__tile img { display:block; width:100%; height:100%; object-fit:contain; }
+/* Transparent supplied artwork; no image tiles or opaque logo backgrounds. */
+.athraven-signature { display:inline-flex; align-items:center; gap:11px; flex-shrink:0; color:#5c6470; text-align:left; line-height:1.4; }
+.athraven-signature__symbol { display:block; width:44px; height:32px; object-fit:contain; flex-shrink:0; background:transparent; }
 .athraven-signature__copy { display:flex; flex-direction:column; gap:3px; font-size:11px; }
 .athraven-signature__copy strong { font-size:11px; font-weight:750; letter-spacing:.25px; color:#374151; }
 .athraven-signature__copy small { color:#727780; font-size:10px; font-weight:400; letter-spacing:0; }
 .athraven-signature--dark { color:#a1a7b1; }
 .athraven-signature--dark .athraven-signature__copy strong { color:#e5e7eb; }
 .athraven-signature--dark .athraven-signature__copy small { color:#9ca3af; }
-.athraven-signature--compact .athraven-signature__tile,
-.athraven-signature--sidebar .athraven-signature__tile { width:32px; height:32px; padding:5px; border-radius:5px; }
-.athraven-signature--sidebar { gap:8px; }
+.athraven-signature--compact .athraven-signature__symbol,
+.athraven-signature--sidebar .athraven-signature__symbol { width:32px; height:29px; }
+.athraven-signature--sidebar { gap:10px; }
 .athraven-signature--sidebar .athraven-signature__copy { gap:2px; }
 .athraven-signature--sidebar .athraven-signature__copy strong { font-size:10px; letter-spacing:.8px; }
 .athraven-signature--sidebar .athraven-signature__copy small { font-size:8px; }
 .athraven-signature--report { gap:8px; }
-.athraven-signature--report .athraven-signature__tile { width:42px; height:27px; padding:2px; }
+.athraven-signature--report .athraven-signature__symbol { width:32px; height:25px; }
 .athraven-signature--report .athraven-signature__copy,
 .athraven-signature--report .athraven-signature__copy strong { font-size:9px; }
 .athraven-signature--report .athraven-signature__copy small { font-size:8px; }
-.sidebar-athraven { border-top:1px solid #e5e7eb; margin-top:8px; padding:12px 4px 3px; }
+.athraven-attribution { display:inline-flex; flex-direction:column; align-items:center; gap:9px; flex-shrink:0; }
+.athraven-powered-badge { display:inline-flex; align-items:center; justify-content:center; gap:13px; min-height:46px; padding:11px 16px; border-radius:8px; background:#0d203d; color:#d5dfec; }
+.athraven-powered-badge>span { font-size:10px; line-height:1; white-space:nowrap; }
+.athraven-powered-badge>img { display:block; width:114px; height:25px; object-fit:contain; background:transparent; }
+.athraven-attribution>small { color:#727d8d; font-size:10px; line-height:1.4; font-weight:400; }
+.sidebar-athraven { border-top:1px solid #e5e7eb; margin-top:8px; padding:13px 4px 3px; }
 .sidebar-athraven--collapsed { display:flex; justify-content:center; padding-left:0; padding-right:0; }
 .workspace-main { display:flex; flex-direction:column; }
 .workspace-content { flex:1 0 auto; }
@@ -166,24 +142,49 @@ html[data-club="americano"] aside { border-right-color:#18181b; }
 .workspace-footer__owner,.personal-footer__owner { display:flex; flex-direction:column; gap:4px; }
 .workspace-footer__owner strong { font-size:12px; font-weight:650; color:#27272a; }
 .workspace-footer__owner span { font-size:10px; color:#71717a; }
-.personal-footer { align-items:center; gap:24px; }
+.personal-shell { display:flex; flex-direction:column; }
+.personal-topbar { width:100%; }
+.seasons-main { flex:1 0 auto; width:calc(100% - 112px); }
+.personal-footer { align-items:center; gap:24px; width:calc(100% - 112px); }
 .personal-footer__owner strong { color:#52525b; font-size:11px; font-weight:600; }
 .personal-footer__owner span { font-size:10px; }
-.login-shell { grid-template-rows:minmax(0,1fr) auto; }
-.login-brand-footer { grid-column:1 / -1; display:flex; align-items:center; justify-content:flex-end; padding:17px 54px; border-top:1px solid #e1e3e6; background:#f8fafc; }
+.owner-login { min-height:100vh; min-height:100svh; display:flex; align-items:center; justify-content:center; padding:40px 20px; background:#0d203d; color:#0e1828; }
+.owner-login-card { width:100%; max-width:404px; overflow:hidden; border:1px solid #dce3ed; border-radius:16px; background:#fff; box-shadow:0 16px 40px #00000014; }
+.owner-login-heading { display:flex; flex-direction:column; gap:5px; padding:20px 28px; background:#081628; color:#f1f5f9; }
+.owner-login-heading strong { font-size:14px; font-weight:600; }
+.owner-login-heading span { font-size:11px; color:#aab9ce; }
+.owner-login-body { padding:28px; }
+.owner-login-body h1 { font-size:25px; line-height:1.25; letter-spacing:-.7px; font-weight:650; }
+.owner-login-help { font-size:13px; line-height:1.6; color:#64748b; margin-top:7px; margin-bottom:28px; }
+.owner-login-form label { display:block; font-size:12px; font-weight:500; color:#1e293b; margin-top:20px; margin-bottom:9px; }
+.owner-login-form input { width:100%; height:46px; border:1px solid #d7dee8; border-radius:7px; padding:0 13px; font-size:13px; color:#0e1828; background:#fff; outline:none; }
+.owner-login-form input::placeholder { color:#94a3b8; }
+.owner-login-form input:focus { border-color:#536f96; box-shadow:0 0 0 3px #0d203d0c; }
+.owner-password-field { position:relative; }
+.owner-password-field input { padding-right:46px; }
+.owner-password-field button { position:absolute; right:13px; top:14px; color:#64748b; cursor:pointer; }
+.owner-password-field button:focus-visible { outline:2px solid #536f96; outline-offset:3px; }
+.owner-login-submit { width:100%; min-height:47px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; margin-top:26px; border-radius:8px; background:#0d203d; color:#fff; font-size:12px; font-weight:650; cursor:pointer; }
+.owner-login-submit:hover { background:#173052; }
+.owner-login-submit:disabled { opacity:.65; cursor:wait; }
+.owner-login-submit:focus-visible { outline:3px solid #6986ad; outline-offset:3px; }
+.owner-login-error { margin-top:14px; padding:10px 12px; border-radius:6px; background:#fff1f2; color:#b91c1c; font-size:12px; line-height:1.5; }
+.owner-login-brand { display:flex; justify-content:center; padding-top:31px; }
 @media(max-width:767px) {
   .sidebar-athraven { display:flex; justify-content:center; padding:10px 0 2px; }
   .sidebar-athraven .athraven-signature__copy { display:none; }
   .workspace-footer { padding:17px 18px; flex-wrap:wrap; gap:14px 22px; }
   .workspace-footer__owner { flex-basis:100%; }
-  .login-brand-footer { justify-content:center; padding:17px 20px; }
-  .login-form-side { padding-bottom:35px; }
-  .personal-footer { flex-wrap:wrap; gap:18px; padding-bottom:24px; }
+  .seasons-main { width:auto; }
+  .personal-footer { flex-wrap:wrap; gap:18px; padding-bottom:24px; width:auto; }
+  .owner-login { padding:24px 16px; }
+  .owner-login-heading { padding:20px 24px; }
+  .owner-login-body { padding:26px 24px; }
 }
 @media print {
   .workspace-content { overflow:visible!important; }
   .workspace-footer { background:#fff; padding:10px 0 0; margin-top:14px; }
-  .workspace-footer .athraven-signature__tile { width:42px; height:28px; }
+  .workspace-footer .athraven-signature__symbol { width:32px; height:25px; }
   .workspace-footer__owner strong,.workspace-footer .athraven-signature__copy strong { font-size:10px; }
   .workspace-footer__owner span,.workspace-footer .athraven-signature__copy,.workspace-footer .athraven-signature__copy small { font-size:8px; }
   .athraven-signature { break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }

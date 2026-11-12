@@ -20,6 +20,6 @@ export default function SeasonPicker() {
         <div className="season-card-copy"><div><span className="season-year-label">TEMPORADA {s.year}</span><h2>{s.shortName}</h2><p>{s.location}</p></div><span className="season-enter"><ArrowRight size={23} /></span></div>
         <div className="season-card-bottom">{opening === s.id ? 'Abrindo temporada…' : 'Acessar dashboard'}<span>Fisiologia & performance</span></div>
       </button>)}</div>
-    </main><footer className="personal-footer"><div className="personal-footer__owner"><strong>{OWNER.name}</strong><span>{OWNER.role}</span></div><AthravenBrand license /></footer>
+    </main><footer className="personal-footer"><div className="personal-footer__owner"><strong>{OWNER.name}</strong><span>{OWNER.role}</span></div><AthravenBrand badge /></footer>
   </div>
 }
