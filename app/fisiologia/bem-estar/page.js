@@ -58,10 +58,10 @@ function MetricBar({ value, max = 5, invert = false, label }) {
 }
 
 export default function BemEstarPage() {
-  const { href } = useSeason()
+  const { href, season } = useSeason()
 
   const router = useRouter()
-  const { bemEstarData, isLoadingBemEstar, fetchBemEstar, playerPositions, isExcluded } = useData()
+  const { bemEstarData, isLoadingBemEstar, fetchBemEstar, playerPositions, isExcluded, bemEstarError } = useData()
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedAtleta, setSelectedAtleta] = useState('Todos')
   const [filterPosition, setFilterPosition] = useState('')
@@ -120,7 +120,7 @@ export default function BemEstarPage() {
     const alertas = preData.filter(r => r.wellnessScore < 2.5 || r.temDor || r.corUrina >= 4)
     const comDor = preData.filter(r => r.temDor)
     const media = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
-    const srpes = postData.map(r => r.srpe).filter(Boolean)
+    const srpes = postData.map(r => r.srpe).filter(value=>value!==null&&value!==undefined)
     const mediaSrpe = srpes.length > 0 ? srpes.reduce((a, b) => a + b, 0) / srpes.length : null
     // Total = atletas únicos que responderam qualquer formulário no dia
     const nomesUnicos = new Set([...preData.map(r => r.playerName), ...postData.map(r => r.playerName)])
@@ -145,7 +145,9 @@ export default function BemEstarPage() {
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Monitoramento de Prontidão</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <a href={href('/fisiologia/configuracoes')+'#coleta'} className="border rounded-md px-3 py-2 text-xs font-semibold">Formulário dos atletas</a>
+            <a href={href('/fisiologia/coletas')} className="border rounded-md px-3 py-2 text-xs font-semibold">Coletas e pesagem</a>
             <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
@@ -158,6 +160,7 @@ export default function BemEstarPage() {
           </div>
         </header>
 
+        {bemEstarError&&<p role="alert" className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">{bemEstarError}</p>}
         {/* FILTROS */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
@@ -226,7 +229,7 @@ export default function BemEstarPage() {
             </div>
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Média sRPE</p>
-              <p className="text-2xl font-black text-black">{stats.mediaSrpe ? stats.mediaSrpe.toFixed(1) : '—'}</p>
+              <p className="text-2xl font-black text-black">{stats.mediaSrpe !== null ? stats.mediaSrpe.toFixed(1) : '—'}</p>
               <p className="text-[10px] text-slate-500">percepção esforço</p>
             </div>
           </div>
@@ -279,6 +282,7 @@ export default function BemEstarPage() {
                         <MetricBar label="Humor" value={r.humor} max={5} />
                       </div>
 
+                      {r.weightKg!=null&&<p className="text-xs font-semibold text-zinc-600 mb-3">Peso pré: {Number(r.weightKg).toLocaleString('pt-BR')} kg</p>}
                       {/* Hidratação */}
                       {r.corUrina && (
                         <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider mb-2 ${urinaColor(r.corUrina)}`}>
@@ -315,6 +319,7 @@ export default function BemEstarPage() {
                       <p className="text-xs font-black uppercase tracking-tighter text-black leading-tight truncate">{r.playerName}</p>
                     </div>
 
+                    {r.weightKg!=null&&<p className="text-xs font-semibold text-zinc-600 mb-3">Peso pós: {Number(r.weightKg).toLocaleString('pt-BR')} kg</p>}
                     {/* sRPE */}
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">sRPE</span>
@@ -322,7 +327,7 @@ export default function BemEstarPage() {
                         <span className={`text-lg font-black ${!r.srpe ? 'text-slate-300' : r.srpe >= 8 ? 'text-red-600' : r.srpe >= 5 ? 'text-amber-600' : 'text-green-600'}`}>
                           {r.srpe ?? '—'}
                         </span>
-                        {r.srpe && (
+                        {r.srpe !== null && r.srpe !== undefined && (
                           <span className="text-[9px] text-slate-400 font-black">
                             {r.srpe <= 2 ? 'Muito Fraco' : r.srpe <= 4 ? 'Moderado' : r.srpe <= 6 ? 'Forte' : r.srpe <= 8 ? 'Muito Forte' : 'Máximo'}
                           </span>
@@ -331,7 +336,7 @@ export default function BemEstarPage() {
                     </div>
 
                     {/* Carga (UA) */}
-                    {r.srpeLoad && (
+                    {r.srpeLoad !== null && r.srpeLoad !== undefined && (
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Carga (UA)</span>
                         <span className="text-sm font-black text-black">{r.srpeLoad.toFixed(0)}</span>
@@ -347,7 +352,7 @@ export default function BemEstarPage() {
                     )}
 
                     {/* Barra visual sRPE */}
-                    {r.srpe && (
+                    {r.srpe !== null && r.srpe !== undefined && (
                       <div className="mt-2 w-full bg-slate-100 rounded-full h-2">
                         <div
                           className={`h-2 rounded-full ${r.srpe >= 8 ? 'bg-red-500' : r.srpe >= 5 ? 'bg-amber-500' : 'bg-green-500'}`}
@@ -426,7 +431,7 @@ export default function BemEstarPage() {
         {bemEstarData.length === 0 && !isLoadingBemEstar && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Sem dados de bem-estar</p>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Clique em "Atualizar" para carregar do Google Sheets</p>
+            <p className="text-xs text-slate-400 mt-1 font-medium">As respostas do formulário interno aparecerão aqui. Use Configurações para gerar o link dos atletas.</p>
           </div>
         )}
 
@@ -435,10 +440,10 @@ export default function BemEstarPage() {
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-amber-500 rounded-full" />
             <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-              Dados via Google Sheets · Wellness = média(sono, 6-fadiga, 6-doms, 6-estresse, humor) · Auto-refresh 30s
+              Coletas internas e histórico · Wellness em escala 1–5 · Atualização automática a cada 30s
             </span>
           </div>
-          <p className="text-[10px] text-slate-500 font-black italic tracking-tight uppercase">© Fisiologia GN</p>
+          <p className="text-[10px] text-slate-500 font-black italic tracking-tight uppercase">Ângelo Melim · {season.year}</p>
         </footer>
 
       </div>

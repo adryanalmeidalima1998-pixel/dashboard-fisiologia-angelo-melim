@@ -6,7 +6,7 @@ import AthravenBrand from '@/components/AthravenBrand'
 
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
-import { ArrowLeftRight, LogOut, Settings } from 'lucide-react'
+import { ArrowLeftRight, LogOut, Settings, ClipboardList } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 
@@ -51,6 +51,7 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {id:'coletas',titulo:'Coletas e Pesagem',rota:'/fisiologia/coletas',icon:<ClipboardList size={20}/>},
   {
     id: 'semanal',
     titulo: 'Microciclo Semanal',

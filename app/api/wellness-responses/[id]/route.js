@@ -1,0 +1,2 @@
+import {sql,withSeason} from '@/lib/season-server'
+export const DELETE=withSeason(async function DELETE(request,{params}){const{id}=await params;if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))return Response.json({error:'Coleta inválida.'},{status:400});const{rows}=await sql`UPDATE wellness_responses SET deleted_at=NOW() WHERE id=${id} AND deleted_at IS NULL RETURNING id`;return rows.length?Response.json({removed:true}):Response.json({error:'Coleta não encontrada.'},{status:404})})
