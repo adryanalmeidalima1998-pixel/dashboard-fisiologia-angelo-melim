@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { createSeasonHandler } from '../lib/season-handler.mjs'
+import { isAllowedWriteOrigin } from '../lib/request-origin.mjs'
 function fixture(authenticated) {
   const calls=[]
   const wrap=createSeasonHandler({getSession:async()=>authenticated?{user:{id:'angelo-melim'}}:null,canonicalOrigin:()=> 'https://dashboard.example',runDatabase:async(s,fn)=>{calls.push(s.id);return fn()}})
@@ -21,6 +22,24 @@ test('missing or forged seasons cannot silently read the legacy schema',async()=
 test('cross-origin writes are rejected before any database operation',async()=>{
   const {route,request,calls}=fixture(true)
   assert.equal((await route(request('2027-americano','https://other.example'))).status,403);assert.deepEqual(calls,[])
+})
+test('authenticated writes work through both verified dashboard aliases and reject unrelated origins',async()=>{
+  const current='https://dashboard-fisiologia-angelo-melim.vercel.app',legacy='https://dashboard-fisiologia-novorizontino.vercel.app'
+  const calls=[]
+  const wrap=createSeasonHandler({getSession:async()=>({user:{id:'angelo-melim'}}),canonicalOrigin:()=>current,runDatabase:async(season,work)=>{calls.push(season.id);return work()}})
+  const handler=wrap(async()=>Response.json({saved:true}))
+  for(const origin of[current,legacy]) {
+    const response=await handler(new Request(`${origin}/api/athletes`,{method:'POST',headers:{Origin:origin,'X-Season-Id':'2027-americano'}}))
+    assert.equal(response.status,200);assert.deepEqual(await response.json(),{saved:true})
+    assert.equal(isAllowedWriteOrigin(current,origin),true)
+  }
+  assert.deepEqual(calls,['2027-americano','2027-americano'])
+  for(const origin of['https://other.vercel.app',`${legacy}.evil.test`,'http://dashboard-fisiologia-novorizontino.vercel.app',`${legacy}:8443`,'null']) {
+    const response=await handler(new Request(`${legacy}/api/athletes`,{method:'POST',headers:{Origin:origin,'X-Season-Id':'2027-americano'}}))
+    assert.equal(response.status,403)
+  }
+  assert.equal(calls.length,2)
+  assert.equal(isAllowedWriteOrigin(legacy,'https://dashboard.example'),false)
 })
 test('authenticated calls pass the selected season and cannot be shared-cached',async()=>{
   const {route,request,calls}=fixture(true)
