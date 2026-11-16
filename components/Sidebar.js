@@ -174,6 +174,7 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {id:'historico-atletas',titulo:'Histórico de atletas',rota:'/fisiologia/historico-atletas',icon:<ClipboardList size={20}/>},
   {
     id: 'atletas',
     titulo: 'Cadastro de Atletas',

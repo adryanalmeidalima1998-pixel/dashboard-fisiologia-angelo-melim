@@ -1,35 +1,16 @@
 import { sql, withSeason } from '@/lib/season-server'
+import { saveRegistration, validateRegistration } from '@/lib/athlete-registration.mjs'
 
 // PUT /api/athletes/[id]
-export const PUT = withSeason(async function PUT(request, { params }) {
-  try {
-    const { id } = await params
-    const body = await request.json()
-    const { name, full_name, birth_date, weight_kg, height_cm, dominant_foot, city, position, notes } = body
-
-    if (!name) return Response.json({ error: 'name é obrigatório.' }, { status: 400 })
-
-    const { rows } = await sql`
-      UPDATE athletes SET
-        name          = ${name},
-        full_name     = ${full_name || null},
-        birth_date    = ${birth_date || null},
-        weight_kg     = ${weight_kg || null},
-        height_cm     = ${height_cm || null},
-        dominant_foot = ${dominant_foot || null},
-        city          = ${city || null},
-        position      = ${position || null},
-        notes         = ${notes || null},
-        updated_at    = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `
-    if (rows.length === 0) return Response.json({ error: 'Atleta não encontrado.' }, { status: 404 })
-    return Response.json({ athlete: rows[0] })
-  } catch (err) {
-    console.error('Athletes PUT error:', err)
-    return Response.json({ error: 'Erro ao atualizar atleta.' }, { status: 500 })
-  }
+export const PUT = withSeason(async function PUT(request, {params}) {
+  const {id} = await params
+  if (!/^[1-9][0-9]*$/.test(id)) return Response.json({error:'Atleta inválido.'}, {status:400})
+  let body
+  try { body = await request.json(); validateRegistration(body) }
+  catch (error) { return Response.json({error:error.message || 'Cadastro inválido.'}, {status:400}) }
+  const athlete = await saveRegistration(body,Number(id))
+  if (!athlete) return Response.json({error:'Atleta não encontrado.'}, {status:404})
+  return Response.json({athlete})
 })
 
 // DELETE /api/athletes/[id]

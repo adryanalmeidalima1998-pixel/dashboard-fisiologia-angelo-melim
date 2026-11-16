@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import ExportPdfButton from '../../../components/ExportPdfButton'
 
-const POSICOES = ['GK', 'ZAG', 'LD', 'LE', 'VOL', 'MC', 'MEI', 'PD', 'PE', 'CA', 'ATA']
+const POSICOES = ['GK', 'ZAG', 'LD', 'LE', 'VOL', 'MC', 'MEI', 'PD', 'PE', 'CA', 'ATA', 'EXT']
 
 const PES = ['Direito', 'Esquerdo', 'Ambidestro']
 
@@ -215,25 +215,14 @@ function InjuryBodyMap({ injuries, onSelectRegion, selectedRegion, interactive =
 function AthleteModal({ athlete, onClose, onSave }) {
   const { apiFetch } = useSeason()
 
-  const [form, setForm] = useState({
-    name: '',
-    full_name: '',
-    birth_date: '',
-    weight_kg: '',
-    height_cm: '',
-    dominant_foot: '',
-    city: '',
-    position: '',
-    notes: '',
-    ...athlete,
-  })
+  const [form, setForm] = useState({name: athlete?.name || '', position: athlete?.position || ''})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   async function handleSave() {
-    if (!form.name.trim()) { setError('Nome no sistema é obrigatório.'); return }
+    if (!form.name.trim() || !form.position) { setError('Informe o nome e a posição do atleta.'); return }
     setSaving(true)
     setError('')
     try {
@@ -242,7 +231,7 @@ function AthleteModal({ athlete, onClose, onSave }) {
       const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, weight_kg: form.weight_kg || null, height_cm: form.height_cm || null }),
+        body: JSON.stringify({name:form.name.trim(),position:form.position}),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Erro ao salvar.'); return }
@@ -270,56 +259,17 @@ function AthleteModal({ athlete, onClose, onSave }) {
         <div className="p-5 flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <p className={labelCls}>Nome no Sistema *</p>
-              <input className={inputCls} value={form.name} onChange={e => set('name', e.target.value)}
-                placeholder="Ex: Rodrigo Campos" />
-              <p className="text-[10px] text-slate-400 mt-0.5">Mesmo nome que aparece no GPS e Bem-Estar</p>
+              <label className={labelCls} htmlFor="registration-name">Nome do atleta *</label>
+              <input id="registration-name" className={inputCls} value={form.name} onChange={e => set('name', e.target.value)} maxLength={255} placeholder="Nome utilizado no elenco, GPS e bem-estar" />
             </div>
             <div className="col-span-2">
-              <p className={labelCls}>Nome Completo</p>
-              <input className={inputCls} value={form.full_name} onChange={e => set('full_name', e.target.value)}
-                placeholder="Ex: Rodrigo Campos da Silva" />
-            </div>
-            <div>
-              <p className={labelCls}>Data de Nascimento</p>
-              <input type="date" className={inputCls} value={form.birth_date}
-                onChange={e => set('birth_date', e.target.value)} />
-            </div>
-            <div>
-              <p className={labelCls}>Cidade de Origem</p>
-              <input className={inputCls} value={form.city} onChange={e => set('city', e.target.value)}
-                placeholder="Ex: São Paulo, SP" />
-            </div>
-            <div>
-              <p className={labelCls}>Peso (kg)</p>
-              <input type="number" step="0.1" className={inputCls} value={form.weight_kg}
-                onChange={e => set('weight_kg', e.target.value)} placeholder="Ex: 78.5" />
-            </div>
-            <div>
-              <p className={labelCls}>Altura (cm)</p>
-              <input type="number" className={inputCls} value={form.height_cm}
-                onChange={e => set('height_cm', e.target.value)} placeholder="Ex: 181" />
-            </div>
-            <div>
-              <p className={labelCls}>Pé Dominante</p>
-              <select className={inputCls} value={form.dominant_foot} onChange={e => set('dominant_foot', e.target.value)}>
+              <label className={labelCls} htmlFor="registration-position">Posição *</label>
+              <select id="registration-position" className={inputCls} value={form.position} onChange={e => set('position', e.target.value)}>
                 <option value="">Selecionar</option>
-                {PES.map(p => <option key={p}>{p}</option>)}
+                {POSICOES.map(p => <option key={p} value={p}>{({GK:'Goleiro',ZAG:'Zagueiro',LD:'Lateral direito',LE:'Lateral esquerdo',VOL:'Meio-campista defensivo',MC:'Meio-campista',MEI:'Meio-campista ofensivo',PD:'Ponta direita',PE:'Ponta esquerda',CA:'Centroavante',ATA:'Atacante',EXT:'Extremo'})[p]}</option>)}
               </select>
             </div>
-            <div>
-              <p className={labelCls}>Posição</p>
-              <select className={inputCls} value={form.position} onChange={e => set('position', e.target.value)}>
-                <option value="">Selecionar</option>
-                {POSICOES.map(p => <option key={p}>{p}</option>)}
-              </select>
-            </div>
-            <div className="col-span-2">
-              <p className={labelCls}>Observações</p>
-              <textarea className={inputCls} rows={2} value={form.notes}
-                onChange={e => set('notes', e.target.value)}
-                placeholder="Informações adicionais..." />
-            </div>
+            <p className="col-span-2 text-xs text-slate-500 leading-relaxed">Os dados pessoais, o histórico e a rotina serão preenchidos pelo atleta no questionário enviado por link.</p>
           </div>
 
           {error && <p className="text-red-600 text-xs font-bold">{error}</p>}
@@ -627,7 +577,7 @@ export default function AtletasPage() {
             <SeasonLogo alt="Escudo" className="h-14 w-auto" />
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-black uppercase leading-none">Cadastro de Atletas</h1>
-              <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Perfil & Histórico de Lesões</p>
+              <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Elenco da temporada</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -645,6 +595,8 @@ export default function AtletasPage() {
         </header>
 
         {/* CORPO DA PÁGINA */}
+        <a href={href('/fisiologia/historico-atletas')} className="block border border-slate-200 rounded-lg p-3 text-sm text-slate-600 hover:bg-slate-50">Questionário de histórico: gerar link, consultar respostas e exportar relatórios →</a>
+
         <div className="grid grid-cols-[280px_1fr] gap-5">
 
           {/* ── LISTA DE ATLETAS ── */}

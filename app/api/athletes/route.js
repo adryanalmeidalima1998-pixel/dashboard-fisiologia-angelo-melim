@@ -1,4 +1,5 @@
 import { sql, withSeason } from '@/lib/season-server'
+import { saveRegistration, validateRegistration } from '@/lib/athlete-registration.mjs'
 
 
 
@@ -14,43 +15,11 @@ export const GET = withSeason(async function GET() {
   }
 })
 
-// POST /api/athletes
+// Registration contains only name and position. Historical answers stay separate.
 export const POST = withSeason(async function POST(request) {
-  try {
-    
-    const body = await request.json()
-    const { name, full_name, birth_date, weight_kg, height_cm, dominant_foot, city, position, notes } = body
-
-    if (!name) return Response.json({ error: 'name é obrigatório.' }, { status: 400 })
-
-    const { rows } = await sql`
-      INSERT INTO athletes (name, full_name, birth_date, weight_kg, height_cm, dominant_foot, city, position, notes)
-      VALUES (
-        ${name},
-        ${full_name || null},
-        ${birth_date || null},
-        ${weight_kg || null},
-        ${height_cm || null},
-        ${dominant_foot || null},
-        ${city || null},
-        ${position || null},
-        ${notes || null}
-      )
-      ON CONFLICT (name) DO UPDATE SET
-        full_name     = EXCLUDED.full_name,
-        birth_date    = EXCLUDED.birth_date,
-        weight_kg     = EXCLUDED.weight_kg,
-        height_cm     = EXCLUDED.height_cm,
-        dominant_foot = EXCLUDED.dominant_foot,
-        city          = EXCLUDED.city,
-        position      = EXCLUDED.position,
-        notes         = EXCLUDED.notes,
-        updated_at    = NOW()
-      RETURNING *
-    `
-    return Response.json({ athlete: rows[0] })
-  } catch (err) {
-    console.error('Athletes POST error:', err)
-    return Response.json({ error: 'Erro ao salvar atleta.' }, { status: 500 })
-  }
+  let body
+  try { body = await request.json(); validateRegistration(body) }
+  catch (error) { return Response.json({error: error.message || 'Cadastro inválido.'}, {status:400}) }
+  const athlete = await saveRegistration(body)
+  return Response.json({athlete})
 })

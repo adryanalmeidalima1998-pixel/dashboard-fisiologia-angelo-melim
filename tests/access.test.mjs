@@ -34,6 +34,7 @@ test('every application data route uses the authentication and season boundary',
   for(const file of files('app/api').filter(f=>f.endsWith('/route.js')&&!f.includes('/auth/'))){
     const text=readFileSync(file,'utf8')
     if(file==='app/api/coleta/[seasonId]/route.js'){assert.match(text,/createCollectionHandlers\(/);assert.match(text,/runDatabase:runSeasonDatabase/);assert.match(text,/secret:\(\)=>process\.env\.NEXTAUTH_SECRET/);continue}
+    if(file==='app/api/questionario/[seasonId]/route.js'){assert.match(text,/createHistoryHandlers\(/);assert.match(text,/runDatabase:runSeasonDatabase/);assert.match(text,/secret:\(\)=>process\.env\.NEXTAUTH_SECRET/);continue}
     const methods=[...text.matchAll(/export const (GET|POST|PUT|PATCH|DELETE)\s*=\s*([^\n]+)/g)]
     assert.ok(methods.length,file)
     for(const method of methods)assert.match(method[2],/^withSeason\(/,`${file} ${method[1]}`)
