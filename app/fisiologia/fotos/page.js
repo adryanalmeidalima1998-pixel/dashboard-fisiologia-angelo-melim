@@ -4,29 +4,32 @@ import { SeasonLogo } from '@/components/SeasonBrand'
 
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState, useRef, useCallback } from 'react'
+import { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { useData } from '../../context/DataContext'
 import { AthleteAvatar, compressAndSave, getCustomPhoto, getStaticPhoto, photoStorageKey } from '../../utils/athletePhotos'
 
 export default function FotosAtletas() {
-  const { season, href } = useSeason()
+  const { season, href, apiFetch } = useSeason()
 
   const router = useRouter()
   const { gpsData, bemEstarData } = useData()
   const [search, setSearch] = useState('')
+  const [roster,setRoster]=useState([])
+  const [error,setError]=useState('')
+  useEffect(()=>{let active=true;apiFetch('/api/athletes').then(async r=>{const data=await r.json();if(!r.ok)throw new Error(data.error);if(active)setRoster(data.athletes||[])}).catch(e=>{if(active)setError(e.message)});const update=()=>setTick(t=>t+1);window.addEventListener('athlete-photo-updated',update);return()=>{active=false;window.removeEventListener('athlete-photo-updated',update)}},[apiFetch])
   const [filter, setFilter] = useState('todos') // 'todos' | 'com_foto' | 'sem_foto'
   const [tick, setTick] = useState(0) // força re-render ao salvar
 
   // Todos os atletas únicos (GPS + Bem-Estar)
   const allAthletes = useMemo(() => {
-    const names = new Set()
+    const names = new Set(roster.map(a=>a.name))
     for (const s of gpsData)
       for (const r of s.rows)
         if (r.playerName && r.periodNumber === 0 && !r.isOutlier) names.add(r.playerName)
     for (const r of bemEstarData)
       if (r.playerName) names.add(r.playerName)
     return Array.from(names).sort((a, b) => a.localeCompare(b, 'pt-BR'))
-  }, [gpsData, bemEstarData])
+  }, [gpsData, bemEstarData,roster])
 
   // Re-render quando uma foto for salva em qualquer card
   const handlePhotoSaved = useCallback(() => setTick(t => t + 1), [])
@@ -73,10 +76,12 @@ export default function FotosAtletas() {
               Funciona também em todos os outros cards e tabelas do sistema — o avatar fica clicável em qualquer tela.
             </p>
             <p className="text-xs text-amber-600 mt-1 font-bold">
-              Fotos ficam salvas neste dispositivo. Formatos aceitos: JPG, PNG, WEBP. Imagens são redimensionadas automaticamente.
+              Fotos ficam salvas na plataforma e disponíveis nos outros dispositivos. Formatos aceitos: JPG, PNG, WEBP. Imagens são redimensionadas automaticamente.
             </p>
           </div>
         </div>
+
+        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
 
         {/* KPIs */}
         <div className="grid grid-cols-3 gap-3">
@@ -128,7 +133,7 @@ export default function FotosAtletas() {
         {/* GRID DE ATLETAS */}
         {filtered.length === 0 ? (
           <div className="text-center py-16 text-slate-400 font-medium text-sm">
-            Nenhum atleta encontrado. Carregue GPS ou bem-estar para popular a lista.
+            Nenhum atleta encontrado. Cadastre os atletas no elenco desta temporada.
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
@@ -143,10 +148,10 @@ export default function FotosAtletas() {
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-amber-500 rounded-full" />
             <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-              Fotos salvas localmente neste dispositivo · Não requer upload para servidor
+              Fotos vinculadas à temporada e salvas na plataforma
             </span>
           </div>
-          <p className="text-[10px] text-slate-500 font-black italic tracking-tight uppercase">© Fisiologia GN</p>
+          <p className="text-[10px] text-slate-500 font-black italic tracking-tight uppercase">Ângelo Melim</p>
         </footer>
 
       </div>
@@ -156,10 +161,12 @@ export default function FotosAtletas() {
 
 // ── Card individual do atleta ──────────────────────────────────────────────────
 function AthleteCard({ name, onSaved }) {
-  const { season } = useSeason()
+  const { season, apiFetch } = useSeason()
 
   const [customPhoto, setCustomPhoto] = useState(() => getCustomPhoto(name, season.id))
   const [saving, setSaving] = useState(false)
+  const [error,setError]=useState('')
+  useEffect(()=>{const update=e=>{if(e.detail.key===photoStorageKey(name,season.id))setCustomPhoto(e.detail.url)};window.addEventListener('athlete-photo-updated',update);return()=>window.removeEventListener('athlete-photo-updated',update)},[name,season.id])
   const [justSaved, setJustSaved] = useState(false)
   const fileRef = useRef(null)
 
@@ -167,18 +174,11 @@ function AthleteCard({ name, onSaved }) {
   const hasStatic = !!getStaticPhoto(name, season.id)
   const hasAnyPhoto = hasCustom || hasStatic
 
-  const handleFile = (e) => {
-    const file = e.target.files?.[0]
-    if (!file || !file.type.startsWith('image/')) return
-    setSaving(true)
-    compressAndSave(name, file, (url) => {
-      setCustomPhoto(url)
-      setSaving(false)
-      setJustSaved(true)
-      setTimeout(() => setJustSaved(false), 2000)
-      if (onSaved) onSaved()
-    }, season.id)
-    e.target.value = ''
+  const handleFile = async (e) => {
+    const file=e.target.files?.[0];e.target.value='';if(!file)return
+    setSaving(true);setError('')
+    try{await compressAndSave(name,file,(url)=>{setCustomPhoto(url);setJustSaved(true);setTimeout(()=>setJustSaved(false),2000);onSaved?.()},season.id,apiFetch)}
+    catch(error){setError(error.message)}finally{setSaving(false)}
   }
 
   const displayPhoto = customPhoto || getStaticPhoto(name, season.id)
@@ -236,6 +236,7 @@ function AthleteCard({ name, onSaved }) {
         )}
       </div>
 
+      {error && <p role="alert" className="text-xs text-red-700">{error}</p>}
       {/* Nome */}
       <p className="text-[10px] font-black text-slate-800 text-center leading-tight line-clamp-2">{shortName}</p>
 
@@ -247,7 +248,7 @@ function AthleteCard({ name, onSaved }) {
         {hasAnyPhoto ? '↺ Trocar' : '+ Inserir'}
       </button>
 
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
     </div>
   )
 }

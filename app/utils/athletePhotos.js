@@ -1,6 +1,7 @@
 'use client'
 import { useSeason } from '@/app/context/SeasonContext'
 import { LEGACY_SEASON_ID, seasonStorage, storageKey } from '@/lib/seasons.mjs'
+import { normalizePhotoName } from '@/lib/athlete-photo-key.mjs'
 
 
 import { useState, useEffect, useRef } from 'react'
@@ -72,17 +73,28 @@ const PHOTO_MAP = {
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-export function normalizeKey(name) {
-  if (!name) return ''
-  return name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z\s]/g, '')
-    .replace(/\s+/g, '_')
-    .trim()
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/, '')
-    .toLowerCase()
+export const normalizeKey = normalizePhotoName
+const cloudPhotos = new Map()
+const photoLoads = new Map()
+function cachePhoto(name, dataUrl, seasonId) {
+  cloudPhotos.set(photoStorageKey(name, seasonId), dataUrl)
+  window.dispatchEvent(new CustomEvent('athlete-photo-updated', {detail:{key:photoStorageKey(name,seasonId),url:dataUrl,name}}))
+}
+export async function loadSeasonPhotos(apiFetch, seasonId) {
+  if (!photoLoads.has(seasonId)) {
+    const promise = apiFetch('/api/athlete-photos').then(async response => {
+      const data=await response.json()
+      if (!response.ok) throw new Error(data.error || 'Não foi possível carregar as fotos.')
+      for (const photo of data.photos) cachePhoto(photo.athlete_name,photo.data_url,seasonId)
+    }).catch(error => {photoLoads.delete(seasonId);throw error})
+    photoLoads.set(seasonId,promise)
+  }
+  return photoLoads.get(seasonId)
+}
+export function AthletePhotoSync() {
+  const {apiFetch,season}=useSeason()
+  useEffect(()=>{loadSeasonPhotos(apiFetch,season.id).catch(()=>{})},[apiFetch,season.id])
+  return null
 }
 
 export function getStaticPhoto(playerName, seasonId) {
@@ -105,7 +117,7 @@ export function photoStorageKey(name, seasonId) { return storageKey(seasonId, 'a
 
 export function getCustomPhoto(name, seasonId) {
   if (typeof window === 'undefined') return null
-  try { return seasonStorage(localStorage, seasonId).getItem('aphoto_' + normalizeKey(name)) || null } catch { return null }
+  return cloudPhotos.get(photoStorageKey(name,seasonId)) || (()=>{try{return seasonStorage(localStorage,seasonId).getItem('aphoto_'+normalizeKey(name)) || null}catch{return null}})()
 }
 
 export function saveCustomPhoto(name, dataUrl, seasonId) {
@@ -118,33 +130,37 @@ export function saveCustomPhoto(name, dataUrl, seasonId) {
   } catch (e) { console.warn('Erro ao salvar foto:', e) }
 }
 
-export function compressAndSave(name, file, onDone, seasonId) {
-  const reader = new FileReader()
-  reader.onload = (ev) => {
-    const img = new Image()
-    img.onload = () => {
-      const MAX = 300
-      const ratio = Math.min(MAX / img.width, MAX / img.height, 1)
-      const canvas = document.createElement('canvas')
-      canvas.width  = Math.round(img.width  * ratio)
-      canvas.height = Math.round(img.height * ratio)
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.88)
-      saveCustomPhoto(name, dataUrl, seasonId)
-      if (onDone) onDone(dataUrl)
-    }
-    img.src = ev.target.result
-  }
-  reader.readAsDataURL(file)
+export async function compressAndSave(name, file, onDone, seasonId, apiFetch) {
+  if (!file || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Escolha uma imagem JPG, PNG ou WEBP.')
+  if (file.size > 10 * 1024 * 1024) throw new Error('Escolha uma foto de até 10 MB.')
+  const objectUrl=URL.createObjectURL(file)
+  let dataUrl
+  try {
+    const img=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Não foi possível abrir a imagem. Escolha outra foto.'));image.src=objectUrl})
+    if (!img.naturalWidth || !img.naturalHeight || img.naturalWidth>16000 || img.naturalHeight>16000) throw new Error('As dimensões desta imagem não são suportadas.')
+    const canvas=document.createElement('canvas');canvas.width=300;canvas.height=300
+    const context=canvas.getContext('2d');context.fillStyle='#ffffff';context.fillRect(0,0,300,300)
+    const side=Math.min(img.naturalWidth,img.naturalHeight)
+    context.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,300,300)
+    dataUrl=canvas.toDataURL('image/jpeg',.88)
+  } finally {URL.revokeObjectURL(objectUrl)}
+  if (!apiFetch) throw new Error('Não foi possível conectar ao cadastro de fotos. Atualize a página.')
+  const response=await apiFetch('/api/athlete-photos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,dataUrl})})
+  const result=await response.json();if(!response.ok)throw new Error(result.error || 'Não foi possível salvar a foto.')
+  cachePhoto(name,dataUrl,seasonId)
+  if(onDone)onDone(dataUrl)
+  return dataUrl
 }
 
 // ── AthleteAvatar ─────────────────────────────────────────────────────────────
 // clickable={true} habilita overlay de câmera + upload ao clicar
-export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring = false, clickable = true }) {
-  const { season } = useSeason()
+export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring = false, clickable = true, onSaved }) {
+  const { season, apiFetch } = useSeason()
   const [customPhoto, setCustomPhoto] = useState(null)
   const [hovered, setHovered]         = useState(false)
   const [saving, setSaving]           = useState(false)
+  const [error,setError] = useState('')
+  const [saved,setSaved] = useState(false)
   const fileRef = useRef(null)
 
   useEffect(() => {
@@ -156,12 +172,11 @@ export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring =
     return () => window.removeEventListener('athlete-photo-updated', handler)
   }, [name, season.id])
 
-  const handleFile = (e) => {
-    const file = e.target.files?.[0]
-    if (!file || !file.type.startsWith('image/')) return
-    setSaving(true)
-    compressAndSave(name, file, (url) => { setCustomPhoto(url); setSaving(false) }, season.id)
-    e.target.value = ''
+  const handleFile = async (e) => {
+    const file=e.target.files?.[0];e.target.value='';if(!file)return
+    setSaving(true);setError('');setSaved(false)
+    try{await compressAndSave(name,file,(url)=>{setCustomPhoto(url);setSaved(true);onSaved?.(url)},season.id,apiFetch)}
+    catch(error){setError(error.message)}finally{setSaving(false)}
   }
 
   const photo    = customPhoto || getStaticPhoto(name, season.id)
@@ -169,10 +184,12 @@ export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring =
   const ringCls  = ring ? 'ring-2 ring-amber-400 ring-offset-1' : ''
 
   const wrapProps = clickable ? {
-    onClick:      (e) => { e.stopPropagation(); fileRef.current?.click() },
+    onClick:      (e) => { e.stopPropagation(); if(!saving)fileRef.current?.click() },
     onMouseEnter: () => setHovered(true),
     onMouseLeave: () => setHovered(false),
-    title:        photo ? 'Clique para trocar a foto' : 'Clique para inserir a foto',
+    role:'button',tabIndex:0,'aria-label':`${photo?'Trocar':'Adicionar'} foto de ${name}`,'aria-busy':saving,
+    onKeyDown:(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();if(!saving)fileRef.current?.click()}},
+    title:photo?'Clique para trocar a foto':'Clique para inserir a foto',
   } : {}
 
   const overlay = clickable && (hovered || saving) ? (
@@ -191,7 +208,9 @@ export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring =
     </div>
   ) : null
 
-  const inputEl = clickable ? <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} /> : null
+  const status = error ? <span role="alert" className="absolute top-full left-0 z-20 mt-2 min-w-48 max-w-64 rounded-md border border-red-200 bg-white p-2 text-xs text-red-700 shadow">{error}</span> : saved ? <span role="status" className="sr-only">Foto salva na plataforma.</span> : null
+  const badge = clickable && !saving ? <span aria-hidden="true" className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h4l2-3h4l2 3h4v15H4z"/><circle cx="12" cy="13" r="4"/></svg></span> : null
+  const inputEl = clickable ? <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" aria-label={`Arquivo da foto de ${name}`} className="hidden" onClick={e=>e.stopPropagation()} onChange={handleFile} /> : null
 
   if (photo) {
     return (
@@ -199,7 +218,7 @@ export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring =
         <img src={photo} alt={name || ''} className={`${size} rounded-full object-cover object-top flex-shrink-0 ${ringCls} ${className}`}
           onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex' }} />
         {overlay}
-        {inputEl}
+        {badge}{status}{inputEl}
       </div>
     )
   }
@@ -208,7 +227,7 @@ export function AthleteAvatar({ name, size = 'w-10 h-10', className = '', ring =
     <div className={`relative ${size} rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 ${ringCls} ${className} ${clickable ? 'cursor-pointer' : ''}`} {...wrapProps}>
       <span className="text-slate-500 font-black text-xs leading-none select-none">{initials}</span>
       {overlay}
-      {inputEl}
+      {badge}{status}{inputEl}
     </div>
   )
 }

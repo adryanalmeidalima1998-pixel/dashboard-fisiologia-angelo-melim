@@ -10,7 +10,7 @@ import { createHistoryHandlers, reopenHistory } from '../lib/athlete-history-han
 import { saveRegistration } from '../lib/athlete-registration.mjs'
 const old = '2026-novorizontino', next = '2027-americano', secret = 'test-only-history-secret'
 export const exampleAnswers = () => ({
-  fullName:'Atleta de teste',birthDate:'1998-05-10',origin:'Campos dos Goytacazes / RJ',heightCm:'181',weightKg:'78,50',position:'VOL',dominantFoot:'Destro',
+  birthDate:'1998-05-10',origin:'Campos dos Goytacazes / RJ',heightCm:'181',weightKg:'78,50',position:'VOL',dominantFoot:'Destro',
   clubs:'Clube de teste - profissional - 2026',officialCompetition:'Sim',gamesSixMonths:0,minutesSixMonths:0,
   significantInjury:'Não',surgery:'Não',extraWork:'Não',sleep:'6–8 horas',alcohol:'Não',nutrition:'Sim',supplements:'Não',psychology:'Não',medication:'Não',notes:'',
 })

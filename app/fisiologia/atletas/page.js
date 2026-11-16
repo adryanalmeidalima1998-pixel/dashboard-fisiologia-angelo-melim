@@ -1,6 +1,7 @@
 'use client'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo } from '@/components/SeasonBrand'
+import { AthleteAvatar } from '@/app/utils/athletePhotos'
 
 
 import { useState, useEffect, useMemo } from 'react'
@@ -442,11 +443,7 @@ function AthleteCard({ athlete, selected, onClick }) {
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-          <span className="text-sm font-black text-slate-600">
-            {athlete.name.charAt(0).toUpperCase()}
-          </span>
-        </div>
+        <AthleteAvatar name={athlete.name} size="w-9 h-9" clickable={false}/>
         <div className="min-w-0">
           <p className="text-sm font-black text-slate-800 truncate">{athlete.name}</p>
           <p className="text-[10px] text-slate-400 font-medium">
@@ -658,10 +655,9 @@ export default function AtletasPage() {
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl font-black text-black">
-                        {selectedAthlete.name.charAt(0).toUpperCase()}
-                      </span>
+                    <div className="flex flex-col items-center gap-2">
+                      <AthleteAvatar key={selectedAthlete.id} name={selectedAthlete.name} size="w-16 h-16"/>
+                      <span className="text-[10px] text-slate-500">Adicionar / trocar foto</span>
                     </div>
                     <div>
                       <h2 className="text-xl font-black uppercase tracking-tight">{selectedAthlete.name}</h2>
