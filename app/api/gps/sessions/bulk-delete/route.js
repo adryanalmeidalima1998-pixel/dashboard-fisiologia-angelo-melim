@@ -1,4 +1,5 @@
 import { sql, withSeason } from '@/lib/season-server'
+import {expandGpsActivityIds} from '@/lib/gps-session-actions.mjs'
 
 // POST /api/gps/sessions/bulk-delete
 // Body: { ids: number[] }
@@ -15,8 +16,9 @@ export const POST = withSeason(async function POST(request) {
       return Response.json({ error: 'Nenhum ID válido na lista.' }, { status: 400 })
     }
 
+    const activityIds=await expandGpsActivityIds(validIds)
     const { rowCount } = await sql`
-      DELETE FROM gps_sessions WHERE id = ANY(${validIds}::int[])
+      DELETE FROM gps_sessions WHERE id = ANY(${activityIds}::int[])
     `
 
     return Response.json({

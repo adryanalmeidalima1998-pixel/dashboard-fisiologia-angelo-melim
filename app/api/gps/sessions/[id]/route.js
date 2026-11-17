@@ -1,4 +1,5 @@
 import { sql, withSeason } from '@/lib/season-server'
+import {expandGpsActivityIds,patchGpsActivity} from '@/lib/gps-session-actions.mjs'
 
 // DELETE /api/gps/sessions/[id]
 export const DELETE = withSeason(async function DELETE(request, context) {
@@ -12,7 +13,8 @@ export const DELETE = withSeason(async function DELETE(request, context) {
       return Response.json({ error: `ID inválido: "${rawId}"` }, { status: 400 })
     }
 
-    const { rowCount } = await sql`DELETE FROM gps_sessions WHERE id = ${id}`
+    const ids=await expandGpsActivityIds([id])
+    const { rowCount } = await sql`DELETE FROM gps_sessions WHERE id=ANY(${ids}::int[])`
 
     if (rowCount === 0) {
       return Response.json({ error: 'Sessão não encontrada.' }, { status: 404 })
@@ -45,20 +47,8 @@ export const PATCH = withSeason(async function PATCH(request, context) {
       return Response.json({ error: 'Body inválido. Envie { metadata: { ... } }' }, { status: 400 })
     }
 
-    // Busca metadata atual
-    const { rows } = await sql`SELECT metadata FROM gps_sessions WHERE id = ${id}`
-    if (!rows.length) {
-      return Response.json({ error: 'Sessão não encontrada.' }, { status: 404 })
-    }
-
-    const current = rows[0].metadata || {}
-    const merged = { ...current, ...patch }
-
-    await sql`
-      UPDATE gps_sessions
-      SET metadata = ${JSON.stringify(merged)}
-      WHERE id = ${id}
-    `
+    const merged=await patchGpsActivity(id,patch)
+    if(!merged)return Response.json({error:'Sessão não encontrada.'},{status:404})
 
     return Response.json({ success: true, metadata: merged })
   } catch (err) {

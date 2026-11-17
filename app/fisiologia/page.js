@@ -475,7 +475,7 @@ export default function Fisiologia() {
               </div>
             )}
 
-            <p className="mt-2 text-[10px] text-slate-500">CSV Catapult em inglês ou português. Importe as partes da atividade; o sistema usa o total Session e bloqueia cópias idênticas.</p>
+            <p className="mt-2 text-[10px] text-slate-500">CSV Catapult em inglês ou português. Importe as partes da atividade; o sistema usa o total Session e identifica possíveis cópias. Blocos confirmados de uma mesma atividade são somados.</p>
             {gpsData.length === 0 && !uploadStatus && uploadQueue.length === 0 && (
               <p className="mt-2 text-[10px] text-slate-400 font-medium">Arraste um ou mais .csv ou clique em "Upload CSV(s)"</p>
             )}

@@ -1,5 +1,5 @@
 import { sql, withSeason } from '@/lib/season-server'
-import {sortGpsSessions} from '@/lib/gps-data.mjs'
+import {consolidateGpsActivities} from '@/lib/gps-activity.mjs'
 
 // GET /api/gps/sessions — retorna todas as sessões salvas
 export const GET = withSeason(async function GET() {
@@ -20,7 +20,7 @@ export const GET = withSeason(async function GET() {
       rows: typeof r.rows === 'string' ? JSON.parse(r.rows) : r.rows,
     }))
 
-    return Response.json({ sessions: sortGpsSessions(sessions) })
+    return Response.json({ sessions: consolidateGpsActivities(sessions) })
 
   } catch (err) {
     console.error('GPS sessions fetch error:', err)
