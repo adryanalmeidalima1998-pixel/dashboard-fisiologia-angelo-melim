@@ -1,14 +1,15 @@
 import { sql, withSeason } from '@/lib/season-server'
 import { saveRegistration, validateRegistration } from '@/lib/athlete-registration.mjs'
+import { readAthleteHistory } from '@/lib/athlete-history-google.mjs'
 
 
 
 // GET /api/athletes
-export const GET = withSeason(async function GET() {
+export const GET = withSeason(async function GET(request,{season}) {
   try {
     
-    const { rows } = await sql`SELECT * FROM athletes ORDER BY name ASC`
-    return Response.json({ athletes: rows })
+    const {athletes}=await readAthleteHistory(season)
+    return Response.json({ athletes })
   } catch (err) {
     console.error('Athletes GET error:', err)
     return Response.json({ error: 'Erro ao buscar atletas.' }, { status: 500 })
