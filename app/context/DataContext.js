@@ -3,6 +3,7 @@ import { useSeason } from '@/app/context/SeasonContext'
 
 
 import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
+import {sortGpsSessions,buildGpsPositions} from '@/lib/gps-data.mjs'
 import {parseBemEstarCSV,normalizeName} from '@/lib/wellness-data.mjs'
 export {parseBemEstarCSV,normalizeName} from '@/lib/wellness-data.mjs'
 
@@ -111,6 +112,7 @@ export function DataProvider({ children }) {
   const { apiFetch } = useSeason()
 
   const [gpsData, setGpsData] = useState([])
+  const [rosterAthletes,setRosterAthletes] = useState([])
   const [isLoadingGps, setIsLoadingGps] = useState(false)
   const [gpsError, setGpsError] = useState(null)
   const [uploadStatus, setUploadStatus] = useState(null)
@@ -198,9 +200,10 @@ export function DataProvider({ children }) {
       const res = await apiFetch('/api/gps/sessions')
       if (!res.ok) throw new Error('Erro ao buscar sessões GPS')
       const { sessions } = await res.json()
-      const processedSessions = applyAliasesToSessions(sessions || [], nameAliases)
+      const processedSessions = sortGpsSessions(applyAliasesToSessions(sessions || [], nameAliases))
       setGpsData(processedSessions)
       setVmaxBaseline(calcVmaxBaseline(processedSessions))
+      try { const rosterResponse=await apiFetch('/api/athletes');if(rosterResponse.ok){const rosterBody=await rosterResponse.json();setRosterAthletes(rosterBody.athletes||[])} } catch { /* GPS remains available if roster enrichment is temporarily unavailable. */ }
     } catch (e) {
       setGpsError(e.message)
     } finally {
@@ -269,7 +272,7 @@ export function DataProvider({ children }) {
 
   // ── Upload de UM CSV GPS ──────────────────────────────────────────────────
   const uploadGpsFile = useCallback(async (file, sessionName = '', metadata = {}) => {
-    if (!file || !file.name.endsWith('.csv')) {
+    if (!file || !/\.csv$/i.test(file.name)) {
       setUploadStatus({ type: 'error', message: 'Selecione um arquivo .csv do Catapult.' })
       return false
     }
@@ -451,17 +454,7 @@ export function DataProvider({ children }) {
       bemEstarConfigured,
       fetchBemEstar,
       vmaxBaseline,
-      playerPositions: (() => {
-        const map = {}
-        for (const session of gpsData) {
-          for (const row of session.rows) {
-            if (row.playerName && row.positionName && !map[row.playerName]) {
-              map[row.playerName] = row.positionName
-            }
-          }
-        }
-        return map
-      })(),
+      playerPositions: buildGpsPositions(gpsData,rosterAthletes),
       canonicalMap,
       getBemEstarForAthlete,
       getUnifiedAthletes,

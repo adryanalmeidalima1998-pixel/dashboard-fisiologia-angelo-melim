@@ -1,4 +1,5 @@
 'use client'
+import {weightedGpsRate} from '@/lib/gps-data.mjs'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo } from '@/components/SeasonBrand'
 
@@ -558,7 +559,7 @@ function IndividualContent() {
     const groupRows = gpsData.flatMap(s => s.rows.filter(r => r.playerName !== athlete && r.periodNumber === 0 && !r.isOutlier))
     const groupAvgDist   = groupRows.length ? groupRows.reduce((s,r) => s+(r.totalDistance||0),0)/groupRows.length : null
     const groupAvgHsr    = groupRows.length ? groupRows.reduce((s,r) => s+(r.hsr||0),0)/groupRows.length : null
-    const groupAvgMmin   = groupRows.length ? groupRows.reduce((s,r) => s+(r.distanceRelative||0),0)/groupRows.length : null
+    const groupAvgMmin   = groupRows.length ? weightedGpsRate(groupRows) : null
     const groupAvgPl     = groupRows.length ? groupRows.reduce((s,r) => s+(r.playerLoad||0),0)/groupRows.length : null
 
     return {
@@ -666,7 +667,7 @@ function IndividualContent() {
     if (!gpsHistory.length) return null
     const n = gpsHistory.length
     return {
-      distanceRelative: gpsHistory.reduce((s, r) => s + (r.distanceRelative || 0), 0) / n,
+      distanceRelative: weightedGpsRate(gpsHistory) ?? 0,
       hsr: gpsHistory.reduce((s, r) => s + (r.hsr || 0), 0) / n,
       sprintDistance: gpsHistory.reduce((s, r) => s + (r.sprintDistance || 0), 0) / n,
       accDecel: gpsHistory.reduce((s, r) => s + (r.acceleration || 0) + (r.deceleration || 0), 0) / n,
@@ -680,7 +681,7 @@ function IndividualContent() {
     if (!rows.length) return null
     const n = rows.length
     return {
-      distanceRelative: rows.reduce((s, r) => s + (r.distanceRelative || 0), 0) / n,
+      distanceRelative: weightedGpsRate(rows) ?? 0,
       hsr: rows.reduce((s, r) => s + (r.hsr || 0), 0) / n,
       sprintDistance: rows.reduce((s, r) => s + (r.sprintDistance || 0), 0) / n,
       accDecel: rows.reduce((s, r) => s + (r.acceleration || 0) + (r.deceleration || 0), 0) / n,
@@ -700,7 +701,7 @@ function IndividualContent() {
     if (!rows.length) return null
     const n = rows.length
     return {
-      distanceRelative: rows.reduce((s, r) => s + (r.distanceRelative || 0), 0) / n,
+      distanceRelative: weightedGpsRate(rows) ?? 0,
       hsr: rows.reduce((s, r) => s + (r.hsr || 0), 0) / n,
       sprintDistance: rows.reduce((s, r) => s + (r.sprintDistance || 0), 0) / n,
       accDecel: rows.reduce((s, r) => s + (r.acceleration || 0) + (r.deceleration || 0), 0) / n,
@@ -728,7 +729,7 @@ function IndividualContent() {
     if (!compareMode || !compareGpsHistory.length) return null
     const n = compareGpsHistory.length
     return {
-      distanceRelative: compareGpsHistory.reduce((s, r) => s + (r.distanceRelative || 0), 0) / n,
+      distanceRelative: weightedGpsRate(compareGpsHistory) ?? 0,
       hsr: compareGpsHistory.reduce((s, r) => s + (r.hsr || 0), 0) / n,
       sprintDistance: compareGpsHistory.reduce((s, r) => s + (r.sprintDistance || 0), 0) / n,
       accDecel: compareGpsHistory.reduce((s, r) => s + (r.acceleration || 0) + (r.deceleration || 0), 0) / n,
@@ -750,7 +751,7 @@ function IndividualContent() {
       wellCount: compareWellnessHistory.length,
       avgDist: compareGpsHistory.length ? compareGpsHistory.reduce((s, r) => s + (r.totalDistance || 0), 0) / compareGpsHistory.length : null,
       avgHsr: compareGpsHistory.length ? compareGpsHistory.reduce((s, r) => s + (r.hsr || 0), 0) / compareGpsHistory.length : null,
-      avgMmin: compareGpsHistory.length ? compareGpsHistory.reduce((s, r) => s + (r.distanceRelative || 0), 0) / compareGpsHistory.length : null,
+      avgMmin: compareGpsHistory.length ? weightedGpsRate(compareGpsHistory) : null,
       vmaxBaseline: vmaxMaxC,
       lastVmax: latestGpsC?.maxVelocity ?? null,
     }

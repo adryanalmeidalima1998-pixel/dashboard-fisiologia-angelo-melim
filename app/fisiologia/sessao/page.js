@@ -165,7 +165,7 @@ function SessaoContent() {
     if (!athletes.length) return {}
     const avgs = {}
     METRICS.forEach(m => {
-      const vals = athletes.map(a => a[m.key]).filter(v => v != null && v > 0)
+      const vals = athletes.map(a => a[m.key]).filter(v => Number.isFinite(v))
       avgs[m.key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
     })
     return avgs
@@ -197,7 +197,7 @@ function SessaoContent() {
   // KPIs rápidos da sessão
   const kpis = useMemo(() => {
     if (!athletes.length) return null
-    const avg = key => { const v = athletes.map(a => a[key]).filter(v => v > 0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null }
+    const avg = key => { const v = athletes.map(a => a[key]).filter(Number.isFinite); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null }
     return {
       n: athletes.length,
       avgDist: avg('totalDistance'),

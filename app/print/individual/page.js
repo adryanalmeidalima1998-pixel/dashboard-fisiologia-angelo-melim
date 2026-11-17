@@ -1,4 +1,5 @@
 'use client'
+import {weightedGpsRate,GPS_EXPORT_NOTE} from '@/lib/gps-data.mjs'
 import { SeasonLogo, SeasonClub } from '@/components/SeasonBrand'
 import AthravenBrand from '@/components/AthravenBrand'
 
@@ -196,7 +197,7 @@ function PrintContent() {
   // ── Estatísticas GPS ─────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     if (!gpsSessions.length) return null
-    const v   = k => gpsSessions.map(s => s[k]).filter(x => x != null && x > 0)
+    const v   = k => gpsSessions.map(s => s[k]).filter(x => Number.isFinite(x))
     const avg = k => { const a = v(k); return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null }
     const max = k => { const a = v(k); return a.length ? Math.max(...a) : null }
     const sum = k => v(k).reduce((s, x) => s + x, 0)
@@ -204,12 +205,12 @@ function PrintContent() {
       sessions:    gpsSessions.length,
       totalDist:   sum('totalDistance'),
       avgDist:     avg('totalDistance'),   maxDist:    max('totalDistance'),
-      avgMmin:     avg('distanceRelative'),
+      avgMmin:     weightedGpsRate(gpsSessions),
       avgHsr:      avg('hsr'),             maxHsr:     max('hsr'),   totalHsr: sum('hsr'),
       avgSprint:   avg('sprintDistance'),  maxSprint:  max('sprintDistance'), totalSprint: sum('sprintDistance'),
       avgLoad:     avg('playerLoad'),      maxLoad:    max('playerLoad'),
       avgVmax:     avg('maxVelocity'),     maxVmax:    max('maxVelocity'),
-      avgAccDec:   (() => { const a = gpsSessions.map(s => (s.acceleration||0)+(s.deceleration||0)).filter(x=>x>0); return a.length ? a.reduce((s,x)=>s+x,0)/a.length : null })(),
+      avgAccDec:   (() => { const a = gpsSessions.map(s => (s.acceleration||0)+(s.deceleration||0)).filter(Number.isFinite); return a.length ? a.reduce((s,x)=>s+x,0)/a.length : null })(),
     }
   }, [gpsSessions])
 
@@ -282,6 +283,7 @@ function PrintContent() {
           </div>
         </div>
 
+        {gpsData.some(s=>s.metadata?.gpsImport?.sourceFormat==='catapult-english-v1')&&<p style={{fontSize:8,color:'#64748b',marginBottom:10}}>{GPS_EXPORT_NOTE}</p>}
         {/* KPIs */}
         <div style={{ display:'grid',gridTemplateColumns:'repeat(8,1fr)',gap:7,marginBottom:12 }}>
           <Kpi label="Sessões"      value={stats?.sessions}                   color="#0f172a" />

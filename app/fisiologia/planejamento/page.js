@@ -44,8 +44,8 @@ const DAY_LABELS = {
 
 const METRICS = [
   { key: 'totalDistance',   label: 'Dist. Total', unit: 'm',     decimals: 0 },
-  { key: 'hsr',             label: 'HSR >20km/h', unit: 'm',     decimals: 0 },
-  { key: 'sprintDistance',  label: 'Sprint >25',  unit: 'm',     decimals: 0 },
+  { key: 'hsr',             label: 'HSR (zona GPS)', unit: 'm',     decimals: 0 },
+  { key: 'sprintDistance',  label: 'Sprint (zona GPS)',  unit: 'm',     decimals: 0 },
   { key: 'sprintCount',     label: 'Nº Sprints',  unit: '',      decimals: 1 },
   { key: 'playerLoad',      label: 'Player Load', unit: '',      decimals: 0 },
 ]

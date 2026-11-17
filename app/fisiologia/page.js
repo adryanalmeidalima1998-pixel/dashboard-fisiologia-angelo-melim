@@ -135,7 +135,7 @@ export default function Fisiologia() {
 
   function handleFilesSelect(files) {
     if (!files || files.length === 0) return
-    const validFiles = Array.from(files).filter(f => f.name.endsWith('.csv'))
+    const validFiles = Array.from(files).filter(f => /\.csv$/i.test(f.name))
     if (validFiles.length === 0) return
     setPendingFiles(validFiles.map(f => ({
       file: f,
@@ -475,6 +475,7 @@ export default function Fisiologia() {
               </div>
             )}
 
+            <p className="mt-2 text-[10px] text-slate-500">CSV Catapult em inglês ou português. Importe as partes da atividade; o sistema usa o total Session e bloqueia cópias idênticas.</p>
             {gpsData.length === 0 && !uploadStatus && uploadQueue.length === 0 && (
               <p className="mt-2 text-[10px] text-slate-400 font-medium">Arraste um ou mais .csv ou clique em "Upload CSV(s)"</p>
             )}

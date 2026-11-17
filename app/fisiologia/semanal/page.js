@@ -1,4 +1,5 @@
 'use client'
+import {weightedGpsRate,GPS_EXPORT_NOTE} from '@/lib/gps-data.mjs'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo } from '@/components/SeasonBrand'
 import { addAthravenPdfFooter } from '@/lib/pdf-brand'
@@ -405,7 +406,7 @@ export default function SemanalDashboard() {
         sprintDistance: rows.reduce((s, r) => s + (r.sprintDistance || 0), 0),
         sprintCount: rows.reduce((s, r) => s + (r.sprintCount || 0), 0),
         accDecel: rows.reduce((s, r) => s + (r.acceleration || 0) + (r.deceleration || 0), 0),
-        avgMmin: rows.reduce((s, r) => s + (r.distanceRelative || 0), 0) / rows.length,
+        avgMmin: weightedGpsRate(rows) ?? 0,
         maxVelocity: Math.max(...rows.map(r => r.maxVelocity || 0)),
         playerLoad: rows.reduce((s, r) => s + (r.playerLoad || 0), 0),
       }
@@ -534,7 +535,7 @@ export default function SemanalDashboard() {
     // Médias do grupo por métrica (apenas atletas não excluídos)
     const teamAvgs = {}
     GPS_METRICS.forEach(m => {
-      const vals = athletesForAvg.map(a => gpsWeekly[a][m.key] || 0).filter(v => v > 0)
+      const vals = athletesForAvg.map(a => gpsWeekly[a][m.key]).filter(Number.isFinite)
       teamAvgs[m.key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
     })
 
@@ -547,7 +548,7 @@ export default function SemanalDashboard() {
       const posAthletes = athletesForAvg.filter(a => playerPositions[a] === pos)
       posAvgs[pos] = {}
       GPS_METRICS.forEach(m => {
-        const vals = posAthletes.map(a => gpsWeekly[a][m.key] || 0).filter(v => v > 0)
+        const vals = posAthletes.map(a => gpsWeekly[a][m.key]).filter(Number.isFinite)
         posAvgs[pos][m.key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
       })
     })
@@ -600,11 +601,11 @@ export default function SemanalDashboard() {
         const vals = wAthletes.map(a => {
           const rows = wGps.flatMap(s => s.rows.filter(r => r.playerName === a && r.periodNumber === 0 && !r.isOutlier))
           if (!rows.length) return null
-          if (m.key === 'avgMmin') return rows.reduce((s,r) => s+(r.distanceRelative||0),0)/rows.length
+          if (m.key === 'avgMmin') return weightedGpsRate(rows) ?? 0
           if (m.key === 'maxVelocity') return Math.max(...rows.map(r => r.maxVelocity||0))
           if (m.key === 'accDecel') return rows.reduce((s,r) => s+(r.acceleration||0)+(r.deceleration||0),0)
           return rows.reduce((s,r) => s+(r[m.key]||0),0)
-        }).filter(v => v !== null && v > 0)
+        }).filter(Number.isFinite)
         groupGps[m.key] = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null
       })
 
@@ -615,7 +616,7 @@ export default function SemanalDashboard() {
         if (!rows.length) return
         const ag = {}
         GPS_EVOLUCAO_METRICS.forEach(m => {
-          if (m.key === 'avgMmin') ag[m.key] = rows.reduce((s,r) => s+(r.distanceRelative||0),0)/rows.length
+          if (m.key === 'avgMmin') ag[m.key] = weightedGpsRate(rows) ?? 0
           else if (m.key === 'maxVelocity') ag[m.key] = Math.max(...rows.map(r => r.maxVelocity||0))
           else if (m.key === 'accDecel') ag[m.key] = rows.reduce((s,r) => s+(r.acceleration||0)+(r.deceleration||0),0)
           else ag[m.key] = rows.reduce((s,r) => s+(r[m.key]||0),0)
@@ -735,7 +736,7 @@ export default function SemanalDashboard() {
                     doc.text('MÉDIAS GPS SEMANAL', 14, y)
                     const gpsGroupAvg2 = {}
                     gpsKeys2.forEach(k => {
-                      const vals = gpsAthletesForPdf.map(a => gpsWeekly[a]?.[k] || 0).filter(v => v > 0)
+                      const vals = gpsAthletesForPdf.map(a => gpsWeekly[a]?.[k]).filter(Number.isFinite)
                       gpsGroupAvg2[k] = vals.length ? vals.reduce((a,b) => a+b,0) / vals.length : null
                     })
                     autoTable(doc, {
@@ -787,7 +788,7 @@ export default function SemanalDashboard() {
                     }
                   }
 
-                  await addAthravenPdfFooter(doc, season)
+                  await addAthravenPdfFooter(doc, season, weekGps.some(s=>s.metadata?.gpsImport?.sourceFormat==='catapult-english-v1')?GPS_EXPORT_NOTE:null)
 
                   doc.save(`relatorio-semanal-${monday.toISOString().split('T')[0]}.pdf`)
                 } catch(e) {
@@ -1146,7 +1147,7 @@ export default function SemanalDashboard() {
               gpsKeys.forEach(k => {
                 const vals = sortedGpsAthletes
                   .filter(a => !excludedAthletes.has(a))
-                  .map(a => gpsWeekly[a]?.[k] || 0).filter(v => v > 0)
+                  .map(a => gpsWeekly[a]?.[k]).filter(Number.isFinite)
                 groupGpsAvg[k] = vals.length ? vals.reduce((a,b) => a+b,0) / vals.length : null
               })
               // Cor relativa à média: verde >120%, vermelho <80%
