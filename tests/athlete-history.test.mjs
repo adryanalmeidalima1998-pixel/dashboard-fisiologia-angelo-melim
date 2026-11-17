@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
+import {inflateSync} from 'node:zlib'
 import { PGlite } from '@electric-sql/pglite'
 import { prepareSeason, inSeason, sql } from '../lib/season-db.mjs'
 import { newCollectionConfig, collectionToken } from '../lib/collection-token.mjs'
@@ -95,7 +96,15 @@ test('individual and general PDFs retain long answers and include pending athlet
   const responses=[{athlete_id:1,created_at:'2026-11-16T14:00:00Z',answers,is_current:true}]
   const season={shortName:'Americano FC',year:2027}
   const individual=buildHistoryPdf({season,athletes:[athletes[0]],responses,individual:true})
-  assert.ok(individual.getNumberOfPages()>1);assert.match(individual.output(),/FINAL_DO_HISTORICO/)
+  const textOf=doc=>{
+    const raw=doc.output(),streams=[]
+    for(const match of raw.matchAll(/\/Length (\d+)\n\/Filter \/FlateDecode\n>>\nstream\n/g)){
+      const start=match.index+match[0].length
+      streams.push(inflateSync(Buffer.from(raw.slice(start,start+Number(match[1])),'binary')).toString('latin1'))
+    }
+    return raw+streams.join('\n')
+  }
+  assert.ok(individual.getNumberOfPages()>1);assert.match(textOf(individual),/FINAL_DO_HISTORICO/)
   const general=buildHistoryPdf({season,athletes,responses})
-  assert.match(general.output(),/Atleta pendente/);assert.match(general.output(),/Pendente/);assert.match(general.output(),/FINAL_DO_HISTORICO/)
+  assert.match(textOf(general),/Atleta pendente/);assert.match(textOf(general),/Pendente/);assert.match(textOf(general),/FINAL_DO_HISTORICO/)
 })

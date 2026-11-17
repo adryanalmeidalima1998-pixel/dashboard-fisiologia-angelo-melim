@@ -1,11 +1,13 @@
 'use client'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Download, RefreshCw, ClipboardList } from 'lucide-react'
+import { Download, RefreshCw, ClipboardList, Settings2, ChevronDown } from 'lucide-react'
 import { useSeason } from '@/app/context/SeasonContext'
 import { SeasonLogo } from '@/components/SeasonBrand'
 import HistoryFormLink from '@/components/HistoryFormLink'
 import HistoryGoogleSource from '@/components/HistoryGoogleSource'
-import { HISTORY_SECTIONS, historyValue, visibleHistoryField } from '@/lib/athlete-history-rules.mjs'
+import HistoryAthleteProfile,{HistoryCompletion,HistoryRosterOverview} from '@/components/HistoryAthleteProfile'
+import {historySquadSummary} from '@/lib/athlete-history-view.mjs'
+import {AthleteAvatar,getCustomPhoto,getStaticPhoto,loadSeasonPhotos} from '@/app/utils/athletePhotos'
 const dateLabel = value => new Date(value).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })
 
 export default function AthleteHistoryPage() {
@@ -32,11 +34,11 @@ export default function AthleteHistoryPage() {
   const current = data.responses.filter(r => r.is_current), athlete = roster.find(a => String(a.id) === selected)
   const versions = data.responses.filter(r => String(r.athlete_id) === selected)
   const response = versions.find(r => r.id === version) || versions.find(r => r.is_current) || versions[0]
-  const answered = data.athletes.filter(a => current.some(r => r.athlete_id === a.id)).length
+  const summary = historySquadSummary(data.athletes,current)
   const filtered = roster.filter(a => a.name.toLocaleLowerCase('pt-BR').includes(search.toLocaleLowerCase('pt-BR')) && (status === 'all' || (status === 'archived' ? a.archived : !a.archived && (status === 'answered' ? current.some(r => r.athlete_id === a.id) : !current.some(r => r.athlete_id === a.id)))))
   async function pdf(individual) {
     setBusy(true); setError('')
-    try { const { downloadHistoryPdf } = await import('@/lib/athlete-history-pdf'); await downloadHistoryPdf({ season, athletes: individual ? [athlete] : data.athletes, responses: individual ? [response] : current, individual }) }
+    try { const { downloadHistoryPdf } = await import('@/lib/athlete-history-pdf'); await loadSeasonPhotos(apiFetch,season.id).catch(()=>{}); const reportAthletes=individual?[athlete]:data.athletes; const photoSources=Object.fromEntries(reportAthletes.map(a=>[a.name,getCustomPhoto(a.name,season.id)||getStaticPhoto(a.name,season.id)])); await downloadHistoryPdf({ season, athletes: reportAthletes, responses: individual ? [response] : current, individual,photoSources }) }
     catch { setError('Não foi possível gerar o PDF. Tente novamente.') } finally { setBusy(false) }
   }
   async function reopen() {
@@ -45,27 +47,22 @@ export default function AthleteHistoryPage() {
     try { const r = await apiFetch('/api/athlete-history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reopen', athleteId: athlete.id }) }), body = await r.json(); if (!r.ok) throw new Error(body.error); await load(); setMessage('Nova resposta liberada. Envie ao atleta o mesmo link do questionário.') }
     catch (e) { setError(e.message) } finally { setBusy(false) }
   }
-  return <div className="history-workspace">
-    <header className="history-page-heading"><div className="flex items-center gap-4"><SeasonLogo className="h-14 w-auto"/><div><h1>Histórico de atletas</h1><p>{season.shortName} · Temporada {season.year}</p></div></div><div className="flex flex-wrap gap-2"><button disabled={loading || busy} onClick={()=>load(true)} className="history-button"><RefreshCw size={15}/>Atualizar</button><button disabled={loading || busy || !data.athletes.length} onClick={() => pdf(false)} className="history-button history-button-primary"><Download size={15}/>{busy ? 'Processando…' : 'PDF geral do elenco'}</button></div></header>
-    <p className="text-sm text-zinc-500 mt-5 leading-relaxed">Questionários preenchidos pelos atletas. As respostas recebidas aparecem automaticamente; os registros anteriores são mantidos para consulta.</p>
-    <div className="history-metrics"><div><span>Atletas no elenco</span><strong>{loading ? '—' : data.athletes.length}</strong></div><div><span>Respondidos</span><strong>{loading ? '—' : answered}</strong></div><div><span>Pendentes</span><strong>{loading ? '—' : data.athletes.length - answered}</strong></div></div>
-    <HistoryGoogleSource sync={data.sync} onData={setData}/>
-    <details className="mt-5"><summary className="text-sm font-semibold text-zinc-600 cursor-pointer">Formulário interno (opcional)</summary><div className="mt-4"><HistoryFormLink athleteCount={data.athletes.length}/></div></details>
+  return <div className="history-workspace history-workspace--cards">
+    <header className="history-page-heading"><div className="flex items-center gap-4"><SeasonLogo className="h-12 w-auto"/><div><span className="history-eyebrow">Fisiologia e preparação física</span><h1>Histórico de atletas</h1><p>{season.shortName} · Temporada {season.year}</p></div></div><div className="flex flex-wrap gap-2"><button disabled={loading || busy} onClick={()=>load(true)} className="history-button"><RefreshCw size={15}/>Atualizar</button><button disabled={loading || busy || !data.athletes.length} onClick={() => pdf(false)} className="history-button history-button-primary"><Download size={15}/>{busy ? 'Processando…' : 'PDF do elenco'}</button></div></header>
+    <HistoryCompletion summary={summary}/>
+    <details className="history-source-drawer"><summary><span><Settings2 size={16}/>{data.sync?.connected?'Google Formulários conectado':'Configurar coleta de respostas'}</span><small>{data.sync?.lastSuccessAt?'Sincronizado em '+dateLabel(data.sync.lastSuccessAt):'Fontes e links'}<ChevronDown size={14}/></small></summary><div className="history-source-drawer-content"><HistoryGoogleSource sync={data.sync} onData={setData}/><details className="mt-5"><summary className="text-sm font-semibold text-zinc-600 cursor-pointer">Formulário interno (opcional)</summary><div className="mt-4"><HistoryFormLink athleteCount={data.athletes.length}/></div></details></div></details>
+    {data.sync?.warning&&<p role="status" className="history-data-warning">{data.sync.warning}</p>}
+    {!!data.sync?.unmatched?.length&&<p role="status" className="history-data-warning">Confira os nomes de {data.sync.unmatched.length} resposta(s) nas configurações de coleta.</p>}
     {error && <p className="collection-error mt-5" role="alert">{error}</p>}{message && <p className="text-sm text-emerald-700 mt-5" role="status">{message}</p>}
     <div className="history-layout">
-      <section className="history-roster"><h2>Atletas</h2><label className="sr-only" htmlFor="history-search">Buscar atleta</label><input id="history-search" placeholder="Buscar atleta…" value={search} onChange={e => setSearch(e.target.value)}/><label className="sr-only" htmlFor="history-status">Filtrar por situação</label><select id="history-status" value={status} onChange={e => setStatus(e.target.value)}><option value="all">Todos os atletas</option><option value="answered">Respondidos</option><option value="pending">Pendentes</option><option value="archived">Fora do elenco</option></select>
-        {loading ? <p className="text-sm text-zinc-500 mt-4" role="status">Carregando…</p> : !filtered.length ? <p className="text-sm text-zinc-500 mt-4">Nenhum atleta nesta seleção. {!roster.length && <a className="underline" href={href('/fisiologia/atletas')}>Cadastrar elenco</a>}</p> : <div className="history-athlete-list">{filtered.map(a => { const r = current.find(r => r.athlete_id === a.id); return <button key={a.id} onClick={() => { setSelected(String(a.id)); setVersion(''); setMessage('') }} className={selected === String(a.id) ? 'selected' : ''} aria-pressed={selected === String(a.id)}><strong>{a.name}</strong><span>{a.archived ? 'Fora do elenco · histórico preservado' : !r ? 'Pendente' : r.allows_update ? 'Respondido · nova resposta liberada' : 'Respondido'}</span></button> })}</div>}
+      <section className="history-roster"><div className="history-roster-heading"><h2>Elenco</h2><span>{roster.length} atletas</span></div><label className="sr-only" htmlFor="history-search">Buscar atleta</label><input id="history-search" placeholder="Buscar pelo nome…" value={search} onChange={e => setSearch(e.target.value)}/><label className="sr-only" htmlFor="history-status">Filtrar por situação</label><select id="history-status" value={status} onChange={e => setStatus(e.target.value)}><option value="all">Todos os atletas</option><option value="answered">Respondidos</option><option value="pending">Pendentes</option><option value="archived">Fora do elenco</option></select>
+        <button className="history-button mt-3 w-full justify-center" onClick={()=>{setSelected('');setVersion('')}}><ClipboardList size={15}/>Visão do elenco</button>
+        {loading ? <p className="text-sm text-zinc-500 mt-4" role="status">Carregando…</p> : !filtered.length ? <p className="text-sm text-zinc-500 mt-4">Nenhum atleta nesta seleção. {!roster.length && <a className="underline" href={href('/fisiologia/atletas')}>Cadastrar elenco</a>}</p> : <div className="history-athlete-list">{filtered.map(a => { const r = current.find(r => r.athlete_id === a.id); return <button key={a.id} onClick={() => { setSelected(String(a.id)); setVersion(''); setMessage('') }} className={selected === String(a.id) ? 'selected' : ''} aria-pressed={selected === String(a.id)}><AthleteAvatar name={a.name} size="w-9 h-9" clickable={false}/><div><strong>{a.name}</strong><span><i className={r?'history-dot history-dot--answered':'history-dot'}/>{a.archived ? 'Histórico preservado' : !r ? 'Pendente' : 'Respondido'}</span></div></button> })}</div>}
       </section>
       <section className="history-detail">
-        {!athlete ? <div className="history-empty"><ClipboardList size={30}/><h2>Selecione um atleta</h2><p>Consulte o questionário e gere o relatório individual.</p></div> : <>
-          <header className="history-detail-heading"><div><h2>{athlete.name}</h2><p>{athlete.archived ? 'Histórico preservado · fora do elenco' : 'Questionário individual'}</p></div>{response && <button disabled={busy} onClick={() => pdf(true)} className="history-button"><Download size={15}/>PDF individual</button>}</header>
-          {!response ? <div className="history-empty"><p>Este atleta ainda não tem resposta vinculada. Confira o preenchimento no formulário e a grafia do nome no elenco.</p></div> : <>
-            <div className="history-version"><label htmlFor="history-version">Resposta consultada</label><select id="history-version" value={response.id} onChange={e => setVersion(e.target.value)}>{versions.map((r, i) => <option key={r.id} value={r.id}>{dateLabel(r.created_at)} · {r.source==='google'?'Google':'Interno'} · {r.is_current ? 'Atual' : `Anterior (${versions.length - i})`}</option>)}</select><p>Informações autodeclaradas pelo atleta. Fonte: {response.source==='google'?'Google Formulários':'formulário interno'}. Os registros de lesões feitos pela comissão continuam no cadastro.</p>
-              {!athlete.archived && response.source!=='google' && <button disabled={busy || current.find(r => r.athlete_id === athlete.id)?.allows_update} className="history-button mt-3" onClick={reopen}>{current.find(r => r.athlete_id === athlete.id)?.allows_update ? 'Nova resposta já liberada' : 'Liberar nova resposta'}</button>}
-            </div>
-            {!!response.answers._warnings?.length&&<div className="p-5 text-sm text-amber-900 bg-amber-50">{response.answers._warnings.map(w=><p key={w}>{w}</p>)}</div>}
-            {HISTORY_SECTIONS.map(section => <section className="history-answer-section" key={section.title}><h3>{section.title}</h3><dl>{section.fields.filter(field => visibleHistoryField(field, response.answers)).map(field => <div key={field.key}><dt>{field.label}</dt><dd>{historyValue(field, response.answers[field.key])}</dd></div>)}</dl></section>)}
-          </>}
+        {!athlete ? <HistoryRosterOverview summary={summary}/> : !response ? <div className="history-pending-profile"><AthleteAvatar name={athlete.name} size="w-24 h-24"/><h2>{athlete.name}</h2><span className="history-answer-pill">Aguardando resposta</span><p>O histórico será exibido quando houver um questionário vinculado a este atleta.</p></div> : <>
+          <div className="history-record-toolbar"><div><label htmlFor="history-version">Registro consultado</label><select id="history-version" value={response.id} onChange={e => setVersion(e.target.value)}>{versions.map((r, i) => <option key={r.id} value={r.id}>{dateLabel(r.created_at)} · {r.source==='google'?'Google':'Interno'} · {r.is_current ? 'Atual' : `Anterior (${versions.length - i})`}</option>)}</select></div><div className="flex gap-2 flex-wrap">{!athlete.archived && response.source!=='google' && <button disabled={busy || current.find(r => r.athlete_id === athlete.id)?.allows_update} className="history-button" onClick={reopen}>{current.find(r => r.athlete_id === athlete.id)?.allows_update ? 'Nova resposta liberada' : 'Liberar nova resposta'}</button>}<button disabled={busy} onClick={() => pdf(true)} className="history-button history-button-primary"><Download size={15}/>PDF individual</button></div></div>
+          <HistoryAthleteProfile athlete={athlete} response={response}/>
         </>}
       </section>
     </div>
