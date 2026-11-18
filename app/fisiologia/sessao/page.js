@@ -6,8 +6,8 @@ import { SeasonLogo } from '@/components/SeasonBrand'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useMemo, Suspense } from 'react'
 import { useData, calcVmaxPct } from '../../context/DataContext'
-import { AthleteAvatar } from '../../utils/athletePhotos'
-import ExportPdfButton from '../../../components/ExportPdfButton'
+import { AthleteAvatar,getCustomPhoto,getStaticPhoto,loadSeasonPhotos } from '../../utils/athletePhotos'
+import SessionPdfButton from '@/components/SessionPdfButton'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   ReferenceLine, Cell, LabelList, ResponsiveContainer,
@@ -115,7 +115,7 @@ function MetricBarChart({ data, metric, avg, onAthleteClick }) {
 
 // ─── PÁGINA ──────────────────────────────────────────────────────────────────
 function SessaoContent() {
-  const { href } = useSeason()
+  const { href,season,apiFetch } = useSeason()
 
   const router = useRouter()
   const params = useSearchParams()
@@ -224,7 +224,7 @@ function SessaoContent() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <ExportPdfButton filename="sessao-gps" />
+            <SessionPdfButton season={season} session={activeSession} athletes={athletes} filterPosition={filterPosition} loadPhotos={async()=>{await loadSeasonPhotos(apiFetch,season.id);return Object.fromEntries(athletes.map(a=>[a.playerName,getCustomPhoto(a.playerName,season.id)||getStaticPhoto(a.playerName,season.id)]))}}/>
             <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1.5 rounded-md text-xs font-black hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
@@ -472,7 +472,7 @@ function SessaoContent() {
               Todos os atletas do período 0 (sessão completa) · Outliers GPS removidos automaticamente
             </span>
           </div>
-          <p className="text-[10px] text-slate-500 font-black italic tracking-tight uppercase">© Fisiologia GN</p>
+          <p className="text-[10px] text-slate-500 font-black italic tracking-tight uppercase">© Ângelo Melim · Fisiologia</p>
         </footer>
 
       </div>
