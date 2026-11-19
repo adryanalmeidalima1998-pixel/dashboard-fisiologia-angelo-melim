@@ -122,6 +122,7 @@ export function DataProvider({ children }) {
   const [isLoadingBemEstar, setIsLoadingBemEstar] = useState(false)
   const [bemEstarError, setBemEstarError] = useState(null)
   const [bemEstarConfigured, setBemEstarConfigured] = useState(null)
+  const [wellnessInfo,setWellnessInfo] = useState({sourceProvider:'hybrid',formUrl:'',lastSyncAt:null})
 
   const [vmaxBaseline, setVmaxBaseline] = useState({})
   const [canonicalMap, setCanonicalMap] = useState({})
@@ -387,14 +388,16 @@ export function DataProvider({ children }) {
   }, [])
 
   // ── Bem-estar do Google Sheets ────────────────────────────────────────────
-  const fetchBemEstar = useCallback(async () => {
+  const fetchBemEstar = useCallback(async (force=false) => {
     setIsLoadingBemEstar(true)
     setBemEstarError(null)
     try {
-      const res = await apiFetch(SHEETS_URL)
+      const res = await apiFetch(SHEETS_URL+(force===true?'?refresh=1':''))
       const data=await res.json()
       if(!res.ok)throw new Error(data.error||'Erro ao buscar coletas')
       setBemEstarConfigured(data.sourceConfigured)
+      const {records,...info}=data;setWellnessInfo(info)
+      setBemEstarError(data.warnings?.length?data.warnings.join(' '):null)
       setBemEstarData(data.records.map(row=>({...row,timestamp:new Date(row.timestamp),_normalizedName:normalizeName(row.playerName)})))
       if(data.warnings?.length)setBemEstarError(data.warnings.join(' '))
     } catch (e) {
@@ -452,6 +455,7 @@ export function DataProvider({ children }) {
       isLoadingBemEstar,
       bemEstarError,
       bemEstarConfigured,
+      wellnessInfo,
       fetchBemEstar,
       vmaxBaseline,
       playerPositions: buildGpsPositions(gpsData,rosterAthletes),

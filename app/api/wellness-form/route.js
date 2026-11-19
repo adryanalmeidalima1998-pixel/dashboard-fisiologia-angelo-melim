@@ -1,8 +1,8 @@
 import {sql,withSeason} from '@/lib/season-server'
 import {readCollectionConfig} from '@/lib/collection-handler.mjs'
 import {newCollectionConfig,collectionPath} from '@/lib/collection-token.mjs'
-import {archiveWellnessHistory,wellnessSource} from '@/lib/wellness-history.mjs'
-async function describe(season){const config=await readCollectionConfig(),{rows}=await sql`SELECT (SELECT COUNT(*) FROM athletes) AS athletes,(SELECT COUNT(*) FROM wellness_responses WHERE deleted_at IS NULL) AS responses,(SELECT COUNT(*) FROM wellness_legacy_archive) AS archived`;return{origin:process.env.NEXTAUTH_URL?new URL(process.env.NEXTAUTH_URL).origin:null,configured:!!config,enabled:!!config?.enabled,path:config?collectionPath(season.id,config,process.env.NEXTAUTH_SECRET):null,athleteCount:Number(rows[0].athletes),responseCount:Number(rows[0].responses),archivedCount:Number(rows[0].archived),hasGoogleSource:!!(await wellnessSource(season))}}
+import {archiveWellnessHistory,wellnessSource,wellnessSettings} from '@/lib/wellness-history.mjs'
+async function describe(season){const settings=await wellnessSettings(season),config=await readCollectionConfig(),{rows}=await sql`SELECT (SELECT COUNT(*) FROM athletes) AS athletes,(SELECT COUNT(*) FROM wellness_responses WHERE deleted_at IS NULL) AS responses,(SELECT COUNT(*) FROM wellness_legacy_archive) AS archived`;return{provider:settings.wellness_provider,formUrl:settings.wellness_form_url||'',scaleMode:settings.wellness_scale,origin:process.env.NEXTAUTH_URL?new URL(process.env.NEXTAUTH_URL).origin:null,configured:!!config,enabled:!!config?.enabled,path:config?collectionPath(season.id,config,process.env.NEXTAUTH_SECRET):null,athleteCount:Number(rows[0].athletes),responseCount:Number(rows[0].responses),archivedCount:Number(rows[0].archived),hasGoogleSource:!!(await wellnessSource(season))}}
 export const GET=withSeason(async function GET(request,{season}){return Response.json(await describe(season))})
 export const POST=withSeason(async function POST(request,{season}){
  let body;try{body=await request.json()}catch{return Response.json({error:'Ação inválida.'},{status:400})}

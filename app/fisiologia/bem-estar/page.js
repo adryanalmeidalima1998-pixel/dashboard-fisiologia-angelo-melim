@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useMemo, useEffect } from 'react'
 import { useData } from '../../context/DataContext'
 import { AthleteAvatar } from '../../utils/athletePhotos'
+import WellnessPdfButton from '@/components/WellnessPdfButton'
 
 const DOR_LABELS = {
   '1': 'Anterior Coxa D', '2': 'Anterior Coxa E', '3': 'Adutor Coxa D', '4': 'Adutor Coxa E',
@@ -52,7 +53,7 @@ function MetricBar({ value, max = 5, invert = false, label }) {
       <div className="w-full bg-slate-100 rounded-full h-1.5">
         <div className={`h-1.5 rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-[9px] font-black text-slate-600">{value}</span>
+      <span className="text-[9px] font-black text-slate-600">{invert?max+1-value:value}</span>
     </div>
   )
 }
@@ -61,7 +62,7 @@ export default function BemEstarPage() {
   const { href, season } = useSeason()
 
   const router = useRouter()
-  const { bemEstarData, isLoadingBemEstar, fetchBemEstar, playerPositions, isExcluded, bemEstarError } = useData()
+  const { bemEstarData, isLoadingBemEstar, fetchBemEstar, playerPositions, isExcluded, bemEstarError,wellnessInfo } = useData()
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedAtleta, setSelectedAtleta] = useState('Todos')
   const [filterPosition, setFilterPosition] = useState('')
@@ -146,13 +147,13 @@ export default function BemEstarPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <a href={href('/fisiologia/configuracoes')+'#coleta'} className="border rounded-md px-3 py-2 text-xs font-semibold">Formulário dos atletas</a>
+            <a href={wellnessInfo.formUrl||href('/fisiologia/configuracoes')+'#coleta'} target={wellnessInfo.formUrl?'_blank':undefined} rel="noreferrer" className="border rounded-md px-3 py-2 text-xs font-semibold">{wellnessInfo.sourceProvider==='google'?'Google Formulários':'Formulário dos atletas'}</a><WellnessPdfButton records={filtered} from={currentDate} to={currentDate} subtitle={selectedAtleta!=='Todos'?selectedAtleta:filterPosition||'Todos os atletas'} label="PDF pré e pós"/>
             <a href={href('/fisiologia/coletas')} className="border rounded-md px-3 py-2 text-xs font-semibold">Coletas e pesagem</a>
             <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">
               ← VOLTAR
             </button>
             <div className="flex flex-col items-end gap-0.5">
-              <button onClick={async () => { await fetchBemEstar(); setLastUpdated(new Date()) }} disabled={isLoadingBemEstar} className="bg-amber-500 text-black px-3 py-1 rounded-md text-xs font-black hover:bg-amber-400 transition-colors disabled:opacity-50">
+              <button onClick={async () => { await fetchBemEstar(true); setLastUpdated(new Date()) }} disabled={isLoadingBemEstar} className="bg-amber-500 text-black px-3 py-1 rounded-md text-xs font-black hover:bg-amber-400 transition-colors disabled:opacity-50">
                 {isLoadingBemEstar ? '⟳ Carregando...' : '↻ Atualizar'}
               </button>
               {lastUpdated && <span className="text-[9px] text-slate-400 font-medium">atualizado {lastUpdated.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>}
@@ -160,6 +161,7 @@ export default function BemEstarPage() {
           </div>
         </header>
 
+        {wellnessInfo.sourceProvider==='google'&&<p className="text-xs text-slate-500">Pré e pós via Google Formulários · Atualização automática a cada 30 segundos{wellnessInfo.lastSyncAt?' · Sincronizado em '+new Date(wellnessInfo.lastSyncAt).toLocaleString('pt-BR'):''}{wellnessInfo.duplicateCount>0?' · Indicadores usam a última resposta de cada atleta no dia e momento.':''}</p>}
         {bemEstarError&&<p role="alert" className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">{bemEstarError}</p>}
         {/* FILTROS */}
         <div className="flex flex-wrap items-center gap-3">

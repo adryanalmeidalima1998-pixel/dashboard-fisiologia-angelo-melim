@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
 import { useData, calcVmaxPct } from '../../context/DataContext'
 import { AthleteAvatar } from '../../utils/athletePhotos'
+import WellnessPdfButton from '@/components/WellnessPdfButton'
+import {collectionDate} from '@/lib/collection-rules.mjs'
 
 function scoreBg(s) {
   if (!s) return 'bg-slate-100 text-slate-400'
@@ -57,7 +59,7 @@ export default function RelatoriosPage() {
   const athlete = selectedAthlete || allAthletes[0] || ''
   const sessionOptions = useMemo(() => gpsData.slice().reverse(), [gpsData])
   const activeSession = useMemo(() => {
-    if (selectedSessionId) return gpsData.find(s => s.id === selectedSessionId)
+    if (selectedSessionId) return gpsData.find(s => String(s.id) === String(selectedSessionId))
     return gpsData[gpsData.length - 1] || null
   }, [gpsData, selectedSessionId])
 
@@ -183,6 +185,12 @@ export default function RelatoriosPage() {
     return recs
   }, [bemEstarData, gpsData, vmaxBaseline, allAthletes, semanal])
 
+  const isoLocal=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const pdfDay=activeSession?.date?.includes('/')?activeSession.date.split('/').reverse().join('-'):activeSession?.date||collectionDate()
+  const pdfFrom=activeReport==='semanal'?isoLocal(monday):activeReport==='individual'?collectionDate(new Date(Date.now()-56*86400000)):pdfDay
+  const pdfTo=activeReport==='semanal'?isoLocal(sunday):activeReport==='individual'?collectionDate():pdfDay
+  const wellnessPdfRecords=bemEstarData.filter(r=>r.date>=pdfFrom&&r.date<=pdfTo&&!isExcluded(r.playerName)&&(activeReport!=='individual'||r.playerName===athlete))
+
   const reportTypes = [
     { id: 'pos-sessao', label: '1. Pós-Sessão', icon: '⚡' },
     { id: 'pos-jogo', label: '2. Pós-Jogo', icon: '⚽' },
@@ -203,7 +211,7 @@ export default function RelatoriosPage() {
               <p className="text-sm font-bold tracking-widest text-slate-600 uppercase">Pós-Sessão · Pós-Jogo · Semanal · Individual</p>
             </div>
           </div>
-          <button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
+          <WellnessPdfButton records={wellnessPdfRecords} from={pdfFrom} to={pdfTo} subtitle={activeReport==='individual'?athlete:'Bem-estar e carga interna'} label="PDF bem-estar"/><button onClick={() => router.push(href('/fisiologia'))} className="bg-slate-200 text-slate-800 px-3 py-1 rounded-md text-xs font-bold hover:bg-slate-300 transition-colors">← VOLTAR</button>
         </header>
 
         {/* RECOMENDAÇÕES AUTOMÁTICAS */}
