@@ -1,4 +1,6 @@
 import { sql, withSeason } from '@/lib/season-server'
+import {canonicalizeAthleteRows} from '@/lib/athlete-identity.mjs'
+import {readAthleteNameResolver} from '@/lib/athlete-identity-server.mjs'
 import {consolidateGpsActivities} from '@/lib/gps-activity.mjs'
 
 // GET /api/gps/sessions — retorna todas as sessões salvas
@@ -10,6 +12,7 @@ export const GET = withSeason(async function GET() {
       ORDER BY session_date DESC, session_name ASC
     `
 
+    const resolveName=await readAthleteNameResolver()
     const sessions = rows.map(r => ({
       id: r.id,
       date: r.session_date,
@@ -17,7 +20,7 @@ export const GET = withSeason(async function GET() {
       filename: r.filename,
       uploadedAt: r.uploaded_at,
       metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : (r.metadata || {}),
-      rows: typeof r.rows === 'string' ? JSON.parse(r.rows) : r.rows,
+      rows: canonicalizeAthleteRows(typeof r.rows === 'string' ? JSON.parse(r.rows) : r.rows,resolveName),
     }))
 
     return Response.json({ sessions: consolidateGpsActivities(sessions) })
